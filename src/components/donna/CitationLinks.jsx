@@ -7,5 +7,6 @@ import { mockSignals } from '@/components/donna/contractFixtures';
  * @param {{ids?:any[],companyId?:any,signals?:any[],base?:string}} props
  */
 export default function CitationLinks({ids=[],companyId=null,signals=mockSignals,base='/'}) {
- return <span className="inline-flex flex-wrap gap-2 ml-1">{(ids||[]).filter(id=>signals.some(signal=>signal.signal_id===id&&(!companyId||signal.company_id===companyId))).map(id=><Link key={id} className="citation" to={`${base}evidence/${id}`}>[{id}]</Link>)}</span>;
+ const known=Array.isArray(signals)?signals:[];
+ return <span className="inline-flex flex-wrap gap-2 ml-1">{(ids||[]).filter(id=>known.some(signal=>signal.signal_id===id&&(!companyId||signal.company_id===companyId))).map(id=><Link key={id} className="citation" to={`${base}evidence/${id}`}>[{id}]</Link>)}</span>;
 }
