@@ -28,6 +28,11 @@ export const requestSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('resolveDeal'), deal_id: idSchema, company_id: idSchema, reason: reasonSchema }).strict(),
   z.object({ action: z.literal('recordAndResolve'), deal_id: idSchema, company: companySchema, reason: reasonSchema }).strict(),
   z.object({ action: z.literal('keepUnresolved'), deal_id: idSchema, reason: reasonSchema.optional() }).strict(),
-  z.object({ action: z.literal('getCompany'), company_id: idSchema, cursor: idSchema.optional() }).strict()
-]);
+  z.object({ action: z.literal('getCompany'), company_id: idSchema, cursor: idSchema.optional() }).strict(),
+  z.object({ action: z.literal('listSignals'), company_id: idSchema.optional(), type: z.string().trim().max(100).optional(), tier: optionalNumber(z.coerce.number().int().min(0).max(3)), since: date.optional(), cursor: idSchema.optional() }).strict(),
+  z.object({ action: z.literal('getBriefing'), briefing_id: idSchema.optional(), company_id: idSchema.optional() }).strict(),
+  z.object({ action: z.literal('listBriefings'), mode: z.enum(['briefing', 'profile']).optional(), cursor: idSchema.optional() }).strict(),
+  z.object({ action: z.literal('getEvidence'), id: idSchema }).strict(),
+  z.object({ action: z.literal('listRuns'), company_id: idSchema.optional(), batch_id: idSchema.optional() }).strict()
+]).refine(input => input.action !== 'getBriefing' || Boolean(input.briefing_id || input.company_id), { path: ['briefing_id'], message: 'Provide a briefing id or a company id.' });
 export const escapeRegex = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
