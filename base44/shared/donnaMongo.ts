@@ -19,6 +19,7 @@ export async function withDonnaDatabase(req, run) {
     let body;
     try { body = JSON.parse(text); } catch { throw new RequestError('Send a valid JSON request.'); }
     body = requestSchema.parse(body);
+    if (body.action === 'testConnection' && user.role !== 'admin') throw new RequestError('Administrator access required.', 403);
     const uri = secrets.get('MONGODB_URI');
     const database = secrets.get('MONGODB_DATABASE');
     if (!uri || !database) throw new RequestError('MongoDB connection settings are missing.', 503);
