@@ -26,8 +26,6 @@ export const timeOf = value => parsed(value)?.toISOString().slice(11, 16) || nul
 export const stampLabel = value => { const date = parsed(value); return date ? `${date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}, ${date.toISOString().slice(11, 16)}` : 'Never checked'; };
 /** Full "9 Oct 2026, 19:42 UTC" for prose. Null when the stamp is missing or unparseable. */
 export const momentLabel = value => { const date = parsed(value); return date ? `${date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })}, ${date.toISOString().slice(11, 16)} UTC` : null; };
-/** "10 Oct · 19:42" for collection-run attempt times. */
-export const attemptLabel = value => { const date = parsed(value); return date ? `${date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })} · ${date.toISOString().slice(11, 16)}` : 'Attempt time not recorded'; };
 
 /**
  * The coverage sentence. This is the empty state for every monitoring surface:
