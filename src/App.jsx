@@ -28,6 +28,10 @@ import LiveIntake from '@/pages/LiveIntake';
 import LiveBook from '@/pages/LiveBook';
 import LiveReview from '@/pages/LiveReview';
 import LiveCompany from '@/pages/LiveCompany';
+import LiveBriefings from '@/pages/LiveBriefings';
+import LiveBriefing from '@/pages/LiveBriefing';
+import LiveEvidence from '@/pages/LiveEvidence';
+import LiveCoverage from '@/pages/LiveCoverage';
 import ClerkGate from '@/components/donna/live/ClerkGate';
 
 const AuthenticatedApp = () => {
@@ -80,6 +84,10 @@ const AuthenticatedApp = () => {
             <Route path="/live-intake" element={<LiveIntake />} />
             <Route path="/live-review" element={<LiveReview />} />
             <Route path="/live-company/:id" element={<LiveCompany />} />
+            <Route path="/live-briefings" element={<LiveBriefings />} />
+            <Route path="/live-briefing/:id" element={<LiveBriefing />} />
+            <Route path="/live-evidence/:id" element={<LiveEvidence />} />
+            <Route path="/live-coverage" element={<LiveCoverage />} />
           </Route>
         </Route>
       </Route>
