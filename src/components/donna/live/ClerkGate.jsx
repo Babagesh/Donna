@@ -1,18 +1,8 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { ClerkProvider, SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
+import { ClerkProvider } from '@clerk/clerk-react';
 import { CLERK_PUBLISHABLE_KEY } from '@/lib/clerkConfig';
-
-function ClerkSession({ children }) {
-  return (
-    <>
-      <SignedIn>{children}</SignedIn>
-      <SignedOut>
-        <RedirectToSignIn />
-      </SignedOut>
-    </>
-  );
-}
+import ClerkSession from '@/components/donna/live/ClerkSession';
 
 export default function ClerkGate() {
   if (!CLERK_PUBLISHABLE_KEY) {

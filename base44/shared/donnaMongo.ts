@@ -2,6 +2,7 @@ import { MongoClient } from 'npm:mongodb@6.12.0';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { secrets } from 'base44:runtime';
 import { requestSchema } from './donnaValidation.ts';
+import { verifyClerkFactor } from './donnaClerk.ts';
 
 export class RequestError extends Error {
   constructor(message, status = 400) { super(message); this.status = status; }
@@ -18,14 +19,21 @@ export async function withDonnaDatabase(req, run) {
     if (text.length > 400000) throw new RequestError('Request is too large.', 413);
     let body;
     try { body = JSON.parse(text); } catch { throw new RequestError('Send a valid JSON request.'); }
-    body = requestSchema.parse(body);
+    const { clerk_token: clerkToken, ...operation } = body;
+    body = requestSchema.parse(operation);
     if (body.action === 'testConnection' && user.role !== 'admin') throw new RequestError('Administrator access required.', 403);
+    const clerkId = body.action === 'testConnection' ? null : await verifyClerkFactor(clerkToken, req.headers.get('origin'));
     const uri = secrets.get('MONGODB_URI');
     const database = secrets.get('MONGODB_DATABASE');
     if (!uri || !database) throw new RequestError('MongoDB connection settings are missing.', 503);
     client = new MongoClient(uri, { serverSelectionTimeoutMS: 10000, connectTimeoutMS: 10000, socketTimeoutMS: 15000, maxPoolSize: 2 });
     await client.connect();
-    const result = await run(client.db(database), user, body);
+    const db = client.db(database);
+    if (clerkId) {
+      const link = await db.collection('donna_auth_links').findOneAndUpdate({ _id: user.id }, { $setOnInsert: { clerk_user_id: clerkId, linked_at: new Date().toISOString() } }, { upsert: true, returnDocument: 'after' });
+      if (link.clerk_user_id !== clerkId) throw new RequestError('Sign in with the Clerk account linked to this agreement book.', 403);
+    }
+    const result = await run(db, user, body);
     return Response.json(result, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     if (error instanceof RequestError) return Response.json({ error: error.message }, { status: error.status });
