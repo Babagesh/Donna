@@ -25,6 +25,7 @@ import { Navigate } from 'react-router-dom';
 import LiveIntake from '@/pages/LiveIntake';
 import LiveReview from '@/pages/LiveReview';
 import LiveCompany from '@/pages/LiveCompany';
+import ClerkGate from '@/components/donna/live/ClerkGate';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -68,10 +69,12 @@ const AuthenticatedApp = () => {
         <Route path="/plan" element={<Plan />} />
       </Route>
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login?returnTo=%2Flive-intake" replace />} />}>
-        <Route element={<WorkspaceLayout />}>
-          <Route path="/live-intake" element={<LiveIntake />} />
-          <Route path="/live-review" element={<LiveReview />} />
-          <Route path="/live-company/:id" element={<LiveCompany />} />
+        <Route element={<ClerkGate />}>
+          <Route element={<WorkspaceLayout />}>
+            <Route path="/live-intake" element={<LiveIntake />} />
+            <Route path="/live-review" element={<LiveReview />} />
+            <Route path="/live-company/:id" element={<LiveCompany />} />
+          </Route>
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
