@@ -1,0 +1,13 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Phone, FileText } from 'lucide-react';
+import { mockSignals } from '@/components/donna/contractFixtures';
+import CitationLinks from '@/components/donna/CitationLinks';
+import SignalList from '@/components/donna/SignalList';
+import CitedNarrative from '@/components/donna/CitedNarrative';
+export default function BriefingBody({briefing,cluster}) {
+ const allowed=id=>cluster.signals.includes(id)&&mockSignals.some(s=>s.signal_id===id&&s.company_id===briefing.company_id);
+ const lines=briefing.what_changed.filter(line=>allowed(line.signal_id));
+ const fallback=briefing.narration_status==='fallback';
+ return <><div className="reading-note mb-6"><FileText size={16}/>{fallback?'Sample fallback: narration failed schema validation. The validated signal list remains available.':'Mock narration rendered from the briefing contract. Each factual observation links to its supporting signal.'}</div><div className="section-heading"><h2>What changed</h2><span className="eyebrow">{lines.length} CITED OBSERVATIONS</span></div>{fallback?<SignalList signals={mockSignals.filter(s=>cluster.signals.includes(s.signal_id))}/>:<section className="panel p-6 space-y-5">{lines.map((line,index)=><div key={line.signal_id} className="flex gap-4"><span className="observation-index">{String(index+1).padStart(2,'0')}</span><p className="text-sm text-muted-foreground leading-7">{line.text}<CitationLinks ids={[line.signal_id]} companyId={briefing.company_id}/></p></div>)}</section>}{!fallback&&briefing.citations.why_it_matters.some(allowed)&&<section className="panel p-6 mt-6"><h2 className="section-title">Why it matters for this agreement</h2><CitedNarrative text={briefing.why_it_matters} signalIds={briefing.citations.why_it_matters.filter(allowed)} dealIds={briefing.citations.deal_context} companyId={briefing.company_id}/><div className="mt-3 flex flex-wrap gap-2">{briefing.citations.deal_context.map(id=><Link key={id} className="citation" to={`/company/${briefing.company_id}#deals`}>[{id}]</Link>)}</div></section>}{cluster.verify_with_counterparty&&briefing.verify&&<section className="verify-box"><Phone size={18}/><div><h2 className="section-title">Verify with the counterparty</h2><p className="text-sm leading-7 mt-2">{briefing.verify}<CitationLinks ids={briefing.citations.verify.filter(allowed)}/></p><p className="text-[10px] mt-3">A Tier 1 observation is a prompt for a human conversation, not a verdict.</p></div></section>}{!fallback&&briefing.confidence_note&&<section className="reading-note mt-5"><p><strong>Confidence note. </strong>{briefing.confidence_note}<CitationLinks ids={briefing.citations.confidence_note.filter(allowed)}/></p></section>}</>;
+}

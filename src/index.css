@@ -270,4 +270,26 @@ h1 { font-size:29px; font-weight:500; letter-spacing:-1.2px; line-height:1.35; c
 @media(max-width:1250px){ .page-container { padding:28px 25px; } .sidebar { width:205px; } .workspace-main { margin-left:205px; } .workspace-label { margin-left:13px; margin-right:13px; } .table-toolbar { gap:0; } .table-tools { margin-left:auto; } .table-tabs { gap:13px; } .search-input input { width:125px; } .briefing-card { padding:15px; } .briefing-card h3 { font-size:14px; } .detail-columns { grid-template-columns:minmax(0,1fr) 250px; } }
 @media(max-width:1023px){ .sidebar { transform:translateX(-100%); transition:transform .2s ease; width:222px; } .sidebar-open { transform:translateX(0); } .workspace-main { margin-left:0; } .mobile-close { display:block; position:absolute; top:18px; right:14px; color:#7e8d6b; } .nav-overlay { display:block; position:fixed; inset:0; z-index:30; background:#14210766; } .topbar { padding:0 25px; } .table-toolbar { flex-wrap:wrap; } }
 @media(max-width:767px){ .page-container { padding:23px 17px; } .topbar { padding:0 17px; min-height:56px; } .page-heading { gap:12px; align-items:flex-start; } h1 { font-size:26px; } .page-kicker { font-size:7px; } .page-heading p { font-size:11px; } .stats-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .stat-cell { padding:17px; } .stat-cell:nth-child(2) { border-right:0; } .stat-cell:nth-child(-n+2) { border-bottom:1px solid #e4e7dc; } .stat-value { font-size:27px; } .briefing-grid { grid-template-columns:1fr; gap:10px; } .briefing-card { min-height:150px; } .briefing-card h3 { font-size:16px; } .briefing-card .mt-4 { margin-top:10px; } .sort-note { font-size:8px; max-width:150px; line-height:1.5; } .table-tabs { gap:15px; width:100%; } .table-tabs button { padding:15px 0 12px; } .table-tools { width:100%; padding:10px 0; } .search-input { flex:1; } .search-input input { width:100%; } .table-bottom { flex-wrap:wrap; font-size:8px; } .workspace-footer { padding:15px 17px; flex-direction:column; gap:6px; font-size:8px; } .ask-panel { padding:17px; } .detail-columns, .intake-columns { grid-template-columns:1fr; } .detail-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .detail-metrics > div { padding:17px; } .detail-metrics > div:nth-child(2) { border-right:0; } .detail-metrics > div:nth-child(-n+2) { border-bottom:1px solid #e1e7d6; } .briefing-list { grid-template-columns:1fr; } .plan-track-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .plan-phase { padding:20px 15px; gap:12px; } .phase-index { font-size:19px; } .failure-row { flex-wrap:wrap; } .failure-row .text-link { margin-left:31px; } }
+.record-tabs { display:flex; gap:22px; align-items:stretch; overflow-x:auto; border-bottom:1px solid hsl(var(--border)); }
+.record-tabs button { padding:14px 0; font-size:11px; color:hsl(var(--muted-foreground)); border-bottom:2px solid transparent; white-space:nowrap; }
+.record-tabs button.selected { color:hsl(var(--primary)); border-bottom-color:hsl(var(--primary)); font-weight:600; }
+.panel > .record-tabs { padding:0 22px; background:hsl(var(--background)); }
+.profile-sections { display:grid; grid-template-columns:1fr 1fr; gap:23px 28px; }
+.profile-sections h3 { font-size:12px; font-weight:600; margin-bottom:9px; }
+.profile-sections p { font-size:12px; line-height:1.9; color:hsl(var(--muted-foreground)); }
+.contract-coverage { margin-top:18px; display:grid; gap:13px; }
+.contract-coverage > div { display:grid; grid-template-columns:105px 1fr; gap:12px; font-size:11px; line-height:1.8; }
+.contract-coverage dt { font-weight:500; }
+.contract-coverage dd { color:hsl(var(--muted-foreground)); }
+.deal-details { border-top:1px solid hsl(var(--border)); padding:16px 0; }
+.deal-details:first-of-type { border-top:0; padding-top:0; }
+.deal-details:last-of-type { padding-bottom:0; }
+.deal-details summary { cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:10px; list-style:none; }
+.deal-details summary::-webkit-details-marker { display:none; }
+.deal-details summary strong { font-size:11px; font-weight:500; overflow-wrap:anywhere; }
+.deal-details summary small { display:block; margin-top:6px; font-size:10px; color:hsl(var(--muted-foreground)); }
+.deal-details[open] summary svg { transform:rotate(180deg); }
+.contract-json { overflow:auto; max-height:620px; padding:20px; border:1px solid hsl(var(--border)); background:hsl(var(--background)); border-radius:5px; font-size:11px; line-height:1.9; color:hsl(var(--foreground)); white-space:pre-wrap; overflow-wrap:anywhere; }
+.observation-index { width:28px; height:28px; flex-shrink:0; border:1px solid hsl(var(--border)); border-radius:4px; display:grid; place-items:center; color:hsl(var(--muted-foreground)); font-size:10px; }
+@media(max-width:767px) { .profile-sections { grid-template-columns:1fr; } .contract-coverage > div { grid-template-columns:1fr; gap:2px; } .record-tabs { gap:16px; } .detail-columns > * { min-width:0; } }
 @media(prefers-reduced-motion:reduce){ *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; } }

@@ -16,6 +16,10 @@ import Intake from '@/pages/Intake';
 import Review from '@/pages/Review';
 import Coverage from '@/pages/Coverage';
 import Plan from '@/pages/Plan';
+import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -43,6 +47,10 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<WorkspaceLayout />}>
         <Route path="/" element={<Book />} />
         <Route path="/company/:id" element={<Company />} />
