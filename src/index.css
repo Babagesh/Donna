@@ -292,4 +292,27 @@ h1 { font-size:29px; font-weight:500; letter-spacing:-1.2px; line-height:1.35; c
 .contract-json { overflow:auto; max-height:620px; padding:20px; border:1px solid hsl(var(--border)); background:hsl(var(--background)); border-radius:5px; font-size:11px; line-height:1.9; color:hsl(var(--foreground)); white-space:pre-wrap; overflow-wrap:anywhere; }
 .observation-index { width:28px; height:28px; flex-shrink:0; border:1px solid hsl(var(--border)); border-radius:4px; display:grid; place-items:center; color:hsl(var(--muted-foreground)); font-size:10px; }
 @media(max-width:767px) { .profile-sections { grid-template-columns:1fr; } .contract-coverage > div { grid-template-columns:1fr; gap:2px; } .record-tabs { gap:16px; } .detail-columns > * { min-width:0; } }
+/* Donna: forest green, pale sage and a subtle redhead-inspired blush. */
+:root { --background:60 25% 97%; --foreground:90 14% 19%; --card:60 33% 99%; --card-foreground:90 14% 19%; --primary:88 23% 31%; --primary-foreground:60 25% 98%; --secondary:8 62% 94%; --secondary-foreground:9 32% 39%; --accent:88 30% 92%; --accent-foreground:88 23% 28%; --muted:88 20% 94%; --muted-foreground:84 9% 44%; --border:84 17% 85%; --input:84 17% 85%; --ring:88 23% 36%; --sidebar-primary:8 62% 79%; }
+.dark { --background:90 15% 11%; --foreground:60 20% 94%; --card:90 13% 15%; --card-foreground:60 20% 94%; --primary:88 28% 70%; --primary-foreground:90 15% 12%; --secondary:8 22% 22%; --secondary-foreground:8 58% 80%; --accent:88 18% 24%; --accent-foreground:88 30% 83%; --muted:90 12% 19%; --muted-foreground:84 12% 68%; --border:84 12% 28%; --input:84 12% 28%; --ring:88 28% 70%; --sidebar-primary:8 62% 79%; }
+.workspace { background:hsl(var(--background)); color:hsl(var(--foreground)); }
+h1 { color:hsl(var(--foreground)); }
+.panel,.briefing-card,.stats-grid,.detail-metrics,.topbar { background:hsl(var(--card)); border-color:hsl(var(--border)); }
+.brand-mark,.brand-period { color:hsl(var(--secondary-foreground)); }
+.sidebar .brand-mark,.sidebar .brand-period { color:hsl(var(--sidebar-primary)); }
+.button-primary { background:hsl(var(--primary)); border-color:hsl(var(--primary)); color:hsl(var(--primary-foreground)); }
+.button-primary:hover { background:hsl(var(--primary) / .92); }
+.button-secondary { background:hsl(var(--secondary)); border-color:hsl(var(--border)); color:hsl(var(--secondary-foreground)); }
+.button-secondary:hover { background:hsl(var(--secondary) / .7); }
+.reading-note,.coverage-note,.count-chip,.company-monogram { background:hsl(var(--accent)); border-color:hsl(var(--border)); color:hsl(var(--accent-foreground)); }
+.form-field input,.form-field select,.form-field textarea,.search-input { background:hsl(var(--card)); border-color:hsl(var(--input)); color:hsl(var(--foreground)); }
+.search-input input { color:hsl(var(--foreground)); width:190px; }
+input:focus,select:focus,textarea:focus { border-color:hsl(var(--ring)) !important; box-shadow:0 0 0 2px hsl(var(--ring) / .13); }
+button:focus-visible,a:focus-visible { outline-color:hsl(var(--ring)); }
+.stat-cell:nth-child(2) { background:hsl(var(--secondary) / .55); }
+.deal-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
+.deal-card { min-height:250px; border-top:3px solid hsl(var(--secondary-foreground) / .28); }
+.deal-card:hover { background:hsl(var(--accent) / .28); }
+@media(max-width:1250px){ .deal-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:767px){ .deal-grid { grid-template-columns:1fr; gap:13px; } .search-input input { width:150px; } }
 @media(prefers-reduced-motion:reduce){ *,*::before,*::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; } }

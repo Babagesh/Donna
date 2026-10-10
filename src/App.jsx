@@ -21,7 +21,9 @@ import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { Navigate } from 'react-router-dom';
+import LoginRedirect from '@/components/donna/live/LoginRedirect';
+import DealDashboard from '@/pages/DealDashboard';
+import DealDetail from '@/pages/DealDetail';
 import LiveIntake from '@/pages/LiveIntake';
 import LiveBook from '@/pages/LiveBook';
 import LiveReview from '@/pages/LiveReview';
@@ -59,7 +61,7 @@ const AuthenticatedApp = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route element={<WorkspaceLayout />}>
-        <Route path="/" element={<Book />} />
+        <Route path="/demo" element={<Book />} />
         <Route path="/company/:id" element={<Company />} />
         <Route path="/briefings" element={<Briefings />} />
         <Route path="/briefing/:id" element={<Briefing />} />
@@ -69,9 +71,11 @@ const AuthenticatedApp = () => {
         <Route path="/coverage" element={<Coverage />} />
         <Route path="/plan" element={<Plan />} />
       </Route>
-      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login?returnTo=%2Flive-intake" replace />} />}>
+      <Route element={<ProtectedRoute unauthenticatedElement={<LoginRedirect />} />}>
         <Route element={<ClerkGate />}>
           <Route element={<WorkspaceLayout />}>
+            <Route path="/" element={<DealDashboard />} />
+            <Route path="/deals/:id" element={<DealDetail />} />
             <Route path="/live-book" element={<LiveBook />} />
             <Route path="/live-intake" element={<LiveIntake />} />
             <Route path="/live-review" element={<LiveReview />} />
