@@ -1,0 +1,17 @@
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Plus, Search, SlidersHorizontal, Download, ArrowDownWideNarrow } from 'lucide-react';
+import BookStats from '@/components/donna/BookStats';
+import RecentBriefings from '@/components/donna/RecentBriefings';
+import CompanyTable from '@/components/donna/CompanyTable';
+import CoverageNote from '@/components/donna/CoverageNote';
+import AskDonna from '@/components/donna/AskDonna';
+import useBookData from '@/components/donna/useBookData';
+import { downloadText } from '@/components/donna/intakeUtils';
+export default function Book(){
+ const companies=useBookData();
+ const [tab,setTab]=useState('all');const [search,setSearch]=useState('');const [filters,setFilters]=useState(false);const [country,setCountry]=useState('all');
+ const rows=companies.filter(c=>(tab==='all'||tab==='gaps'&&c.gaps.length||String(c.tier)===tab)&&c.name.toLowerCase().includes(search.toLowerCase())&&(country==='all'||country===c.country)).sort((a,b)=>(a.tier||4)-(b.tier||4)||b.weight-a.weight||({'High':3,'Medium':2,'Low':1}[b.confidence]||0)-({'High':3,'Medium':2,'Low':1}[a.confidence]||0));
+ const tabs=[['all','All counterparties',companies.length],['1','Tier 1',companies.filter(c=>c.tier===1).length],['2','Tier 2',companies.filter(c=>c.tier===2).length],['gaps','Coverage gaps',companies.filter(c=>c.gaps.length).length]];
+ return <><div className="page-heading"><div><div className="page-kicker">YOUR COUNTERPARTY WORKSPACE</div><h1>Book overview</h1><p>A clear view of what changed. The evidence to understand it.</p></div><Link className="button-primary" to="/intake"><Plus size={16}/> Add deal</Link></div><BookStats/><RecentBriefings/><section className="mt-8"><div className="section-heading"><h2>Your counterparties</h2><span className="sort-note"><ArrowDownWideNarrow size={13}/>Tier, then exposure, then confidence</span></div><div className="panel overflow-hidden"><div className="table-toolbar"><div className="table-tabs">{tabs.map(([key,label,n])=><button key={key} onClick={()=>setTab(key)} className={tab===key?'selected':''}>{label}<span>{n}</span></button>)}</div><div className="table-tools"><div className="search-input"><Search size={14}/><input aria-label="Search counterparties" placeholder="Search counterparties…" value={search} onChange={e=>setSearch(e.target.value)}/></div><button className={`icon-button ${filters?'active':''}`} aria-label="Filter by country" onClick={()=>setFilters(!filters)}><SlidersHorizontal size={15}/></button><button className="icon-button" aria-label="Export displayed counterparties" onClick={()=>downloadText('counterparty,tier,annual_exposure_usd,confidence,coverage_gaps\n'+rows.map(c=>[c.name,c.tier,c.exposure,c.confidence,c.gaps.join(';')].join(',')).join('\n'),'donna-demo-book.csv','text/csv')}><Download size={15}/></button></div></div>{filters&&<div className="filter-row"><label>Country <select value={country} onChange={e=>setCountry(e.target.value)}><option value="all">All countries</option><option value="US">United States</option><option value="GB">United Kingdom</option></select></label><button onClick={()=>{setCountry('all');setSearch('');setTab('all');}} className="text-link">Clear filters</button></div>}<CompanyTable rows={rows}/><div className="table-bottom"><span>Showing {rows.length} of {companies.length} counterparties</span><span>Sample snapshot · 10 Oct 2026, 19:42 UTC</span></div></div></section><div className="mt-5"><CoverageNote compact/></div><div className="mt-7"><AskDonna/></div></>;
+}

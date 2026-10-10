@@ -6,7 +6,16 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
-// Add page imports here
+import WorkspaceLayout from '@/components/donna/WorkspaceLayout';
+import Book from '@/pages/Book';
+import Company from '@/pages/Company';
+import Briefings from '@/pages/Briefings';
+import Briefing from '@/pages/Briefing';
+import Evidence from '@/pages/Evidence';
+import Intake from '@/pages/Intake';
+import Review from '@/pages/Review';
+import Coverage from '@/pages/Coverage';
+import Plan from '@/pages/Plan';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -34,7 +43,17 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
+      <Route element={<WorkspaceLayout />}>
+        <Route path="/" element={<Book />} />
+        <Route path="/company/:id" element={<Company />} />
+        <Route path="/briefings" element={<Briefings />} />
+        <Route path="/briefing/:id" element={<Briefing />} />
+        <Route path="/evidence/:id" element={<Evidence />} />
+        <Route path="/intake" element={<Intake />} />
+        <Route path="/review" element={<Review />} />
+        <Route path="/coverage" element={<Coverage />} />
+        <Route path="/plan" element={<Plan />} />
+      </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );

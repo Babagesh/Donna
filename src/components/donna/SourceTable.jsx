@@ -1,0 +1,5 @@
+import React from 'react';
+import { sourceNames } from '@/components/donna/demoData';
+export default function SourceTable({company}){
+ return <div className="panel table-scroll"><table className="simple-table"><thead><tr><th>Source</th><th>Last attempt (UTC)</th><th>Result</th></tr></thead><tbody>{sourceNames.map(source=>{const failed=company.gaps.includes(source);return <tr key={source}><td>{source}</td><td>10 Oct 2026 · {company.time}</td><td className={failed?'text-[#977247]':'text-[#7a826c]'}>{failed?'Failed · sample timeout':'Checked · sample record'}</td></tr>;})}</tbody></table><p className="p-4 text-[10px] text-[#949988] border-t">Illustrative run history. Failed attempts do not imply the source was checked successfully; last successful fetch is unavailable for failed sample sources.</p></div>;
+}
