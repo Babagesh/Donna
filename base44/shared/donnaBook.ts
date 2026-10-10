@@ -9,7 +9,7 @@ export async function getBook(db, user, input) {
   const [result, totals, counterparties] = await Promise.all([
     db.collection('companies').aggregate([
       { $match: match },
-      { $project: { _id: 0, company_id: 1, canonical_name: 1, jurisdiction: 1, registry_id: 1 } },
+      { $project: { _id: 0, company_id: 1, canonical_name: 1, jurisdiction: 1, registry_id: 1, coverage: 1, top_tier: 1, latest_signal: 1, last_checked_at: 1 } },
       { $lookup: { from: 'deals', let: { company: '$company_id' }, pipeline: [
         { $match: { ...account, status: 'resolved', $expr: { $eq: ['$company_id', '$$company'] } } },
         { $group: { _id: null, agreements: { $sum: 1 }, annual_value_usd: { $sum: '$annual_value_usd' } } }
