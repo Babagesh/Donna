@@ -20,6 +20,11 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { Navigate } from 'react-router-dom';
+import LiveIntake from '@/pages/LiveIntake';
+import LiveReview from '@/pages/LiveReview';
+import LiveCompany from '@/pages/LiveCompany';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -61,6 +66,13 @@ const AuthenticatedApp = () => {
         <Route path="/review" element={<Review />} />
         <Route path="/coverage" element={<Coverage />} />
         <Route path="/plan" element={<Plan />} />
+      </Route>
+      <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login?returnTo=%2Flive-intake" replace />} />}>
+        <Route element={<WorkspaceLayout />}>
+          <Route path="/live-intake" element={<LiveIntake />} />
+          <Route path="/live-review" element={<LiveReview />} />
+          <Route path="/live-company/:id" element={<LiveCompany />} />
+        </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

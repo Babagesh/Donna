@@ -1,0 +1,5 @@
+import React from 'react';
+export default function ManualCompanyForm({name,disabled,canSubmit,onRecord}) {
+ function submit(e){e.preventDefault();onRecord(Object.fromEntries(new FormData(e.currentTarget)));}
+ return <form onSubmit={submit} className="mt-5 border-t border-border pt-5"><h3 className="section-title">Record the legal entity from your agreement</h3><p className="text-xs text-muted-foreground mt-2 mb-4">Manual entry, not independent registry verification. An existing registration will reuse the stored entity.</p><fieldset disabled={disabled} className="form-grid"><label className="form-field"><span>Full legal name *</span><input name="canonical_name" defaultValue={name} maxLength={300} required/></label><label className="form-field"><span>Registration ID *</span><input name="registry_id" maxLength={100} required/></label><label className="form-field"><span>Domain, if known</span><input name="domain" placeholder="example.com" maxLength={253}/></label></fieldset><button type="submit" disabled={disabled||!canSubmit} className="button-primary mt-4">{disabled?'Saving…':'Record entity and link agreement'}</button></form>;
+}
