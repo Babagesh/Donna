@@ -45,10 +45,10 @@ const refusals = [
 ];
 
 const doesList = [
-  [Landmark, 'Watches the counterparties on agreements you record', 'You enter the agreement — counterparty, annual value, share of revenue or spend, notice period, dates. Donna monitors registries, court records, regulator notices, layoff filings, news, executive moves, job postings and site changes against it.'],
-  [FileText, 'Reports change, with the record attached', 'A briefing says what changed, which source recorded it, when it was fetched, and what the agreement is worth. The excerpt is there to read, not summarised away.'],
-  [Gavel, 'Ranks by what the source can support', 'A registry amendment and a court filing carry weight. A drop in open job postings is a pattern, labelled inferred, and is never dressed up as a finding.'],
-  [ShieldCheck, 'Tells you what to verify directly', 'On a tier 1 observation the briefing names the question to put to the counterparty. The relationship is your real sensor; Donna only tells you where to point it.'],
+  { icon: Landmark, title: 'Watches the counterparties on agreements you record', body: 'You enter the agreement — counterparty, annual value, share of revenue or spend, notice period, dates. Donna monitors registries, court records, regulator notices, layoff filings, news, executive moves, job postings and site changes against it.' },
+  { icon: FileText, title: 'Reports change, with the record attached', body: 'A briefing says what changed, which source recorded it, when it was fetched, and what the agreement is worth. The excerpt is there to read, not summarised away.' },
+  { icon: Gavel, title: 'Ranks by what the source can support', body: 'A registry amendment and a court filing carry weight. A drop in open job postings is a pattern, labelled inferred, and is never dressed up as a finding.' },
+  { icon: ShieldCheck, title: 'Tells you what to verify directly', body: 'On a tier 1 observation the briefing names the question to put to the counterparty. The relationship is your real sensor; Donna only tells you where to point it.' },
 ];
 
 const metrics = [
@@ -209,7 +209,7 @@ export default function Landing() {
         <section className="mt-16 border-t border-border pt-12">
           <p className="eyebrow">WHAT IT DOES</p>
           <div className="mt-6 grid gap-5 sm:grid-cols-2">
-            {doesList.map(([Icon, title, body]) => (
+            {doesList.map(({ icon: Icon, title, body }) => (
               <div key={title} className="panel p-6">
                 <Icon size={18} className="text-primary" />
                 <h3 className="mt-4 text-[13px] font-semibold leading-6 text-foreground">{title}</h3>
