@@ -33,6 +33,7 @@ import LiveBriefing from '@/pages/LiveBriefing';
 import LiveEvidence from '@/pages/LiveEvidence';
 import LiveCoverage from '@/pages/LiveCoverage';
 import ClerkGate from '@/components/donna/live/ClerkGate';
+import Landing from '@/pages/Landing';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -75,10 +76,21 @@ const AuthenticatedApp = () => {
         <Route path="/coverage" element={<Coverage />} />
         <Route path="/plan" element={<Plan />} />
       </Route>
+      {/* `/` serves the landing page to a visitor and the monitoring book once
+          they are signed in AND past the second factor. One URL, correct content
+          for each state: the book never loads before MFA, and the landing is
+          reachable without an account. */}
+      <Route element={<ProtectedRoute unauthenticatedElement={<Landing />} />}>
+        <Route element={<ClerkGate />}>
+          <Route element={<WorkspaceLayout />}>
+            <Route path="/" element={<LiveBook />} />
+          </Route>
+        </Route>
+      </Route>
       <Route element={<ProtectedRoute unauthenticatedElement={<LoginRedirect />} />}>
         <Route element={<ClerkGate />}>
           <Route element={<WorkspaceLayout />}>
-            <Route path="/" element={<DealDashboard />} />
+            <Route path="/deals" element={<DealDashboard />} />
             <Route path="/deals/:id" element={<DealDetail />} />
             <Route path="/live-book" element={<LiveBook />} />
             <Route path="/live-intake" element={<LiveIntake />} />
