@@ -13,7 +13,7 @@ export default function LiveEvidence(){
  // newest snapshot stored for that pair, which is what the coverage matrix links to.
  const query=useQuery({queryKey:['donna-live','evidence',id],queryFn:()=>liveRequest({action:'getEvidence',id}),staleTime:15000,retry:false});
  const record=query.data||null;const snapshot=record?.snapshot||null;const signal=record?.signal||null;const run=record?.run||null;
- const entity=useQuery({queryKey:['donna-live','company',snapshot?.company_id],queryFn:()=>liveRequest({action:'getCompany',company_id:snapshot.company_id}),enabled:Boolean(snapshot?.company_id),staleTime:15000,retry:false});
+ const entity=useQuery({queryKey:['donna-live','entity',snapshot?.company_id],queryFn:()=>liveRequest({action:'getCompany',company_id:snapshot.company_id}),enabled:Boolean(snapshot?.company_id),staleTime:15000,retry:false});
  if(query.isPending)return <p role="status" className="reading-note">Loading evidence record…</p>;
  if(query.isError)return <div role="alert" className="form-error">{query.error.message}<button className="text-link ml-3" onClick={()=>query.refetch()}>Retry</button></div>;
  if(!snapshot)return <div className="empty-state">No stored snapshot matches this reference{signal?`, although signal ${signal.signal_id} cites it. The evidence is missing from the record, which is a gap`:''}. <Link to="/live-book">Return to your companies</Link></div>;
