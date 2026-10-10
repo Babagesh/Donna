@@ -16,8 +16,8 @@ export default function LiveBriefing(){
  const briefing=query.data?.briefing||null;const cluster=query.data?.cluster||null;const company=query.data?.company||null;
  const missing=query.isError&&/not found/i.test(query.error?.message||'');
  // Citations are resolved against the stored signals: a line whose signal is absent is not shown.
- const signals=useQuery({queryKey:['donna-live','signals',briefing?.company_id],queryFn:()=>liveRequest({action:'listSignals',company_id:briefing.company_id}),enabled:Boolean(briefing?.company_id),staleTime:15000,retry:false});
- const entity=useQuery({queryKey:['donna-live','company',id],queryFn:()=>liveRequest({action:'getCompany',company_id:id}),enabled:missing,retry:false});
+ const signals=useQuery({queryKey:['donna-live','signal-page',briefing?.company_id],queryFn:()=>liveRequest({action:'listSignals',company_id:briefing.company_id}),enabled:Boolean(briefing?.company_id),staleTime:15000,retry:false});
+ const entity=useQuery({queryKey:['donna-live','entity',id],queryFn:()=>liveRequest({action:'getCompany',company_id:id}),enabled:missing,retry:false});
  if(query.isPending)return <div className="reading-width" role="status"><p className="reading-note">Loading briefing…</p></div>;
  if(missing)return <div className="reading-width"><Link to={`/live-company/${encodeURIComponent(id)}`} className="back-link"><ArrowLeft size={14}/>Company record</Link><div className="page-heading mt-6"><div><h1>No change briefing issued</h1><p>Stored observations remain available on the company timeline; no alert is inferred from missing narration.</p></div></div><p className="reading-note">{coverageSentence(coverageOf(entity.data?.coverage),entity.data?.company?.last_checked_at)}</p>{entity.data&&<div className="mt-6"><ContractCoverage coverage={coverageOf(entity.data.coverage)} asOf={entity.data.company?.last_checked_at}/></div>}</div>;
  if(query.isError)return <div className="reading-width"><div role="alert" className="form-error">{query.error.message}<button className="text-link ml-3" onClick={()=>query.refetch()}>Retry</button></div></div>;
