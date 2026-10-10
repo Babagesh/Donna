@@ -104,13 +104,16 @@ export async function listBriefings(db, user, input) {
 export async function getEvidence(db, user, input) {
   const account = { book_id: user.id };
   const id = idSchema.parse(input.id);
+  const alias = /^snap-(.+)-([a-z]+)$/.exec(id);
   const named = await db.collection('signals').findOne({ ...account, signal_id: id });
-  const [snapshot, signal] = await Promise.all([
+  const [exact, referenced] = await Promise.all([
     db.collection('snapshots').findOne({ ...account, snapshot_id: named?.evidence?.[0]?.snapshot_id || id }),
     named ? Promise.resolve(named) : db.collection('signals').findOne({ ...account, 'evidence.snapshot_id': id })
   ]);
-  if (!snapshot) return { signal: signal ? publicRecord(signal) : null, snapshot: null, run: null, change: null, envelope: null };
-  const [run, change, envelope] = await Promise.all([
+  const snapshot = exact || (alias ? (await db.collection('snapshots').find({ ...account, company_id: alias[1], source: alias[2], ok: true }).sort({ fetched_at: -1, snapshot_id: -1 }).limit(1).maxTimeMS(10000).toArray())[0] : null) || null;
+  if (!snapshot) return { signal: referenced ? publicRecord(referenced) : null, snapshot: null, run: null, change: null, envelope: null };
+  const [signal, run, change, envelope] = await Promise.all([
+    referenced || db.collection('signals').findOne({ ...account, 'evidence.snapshot_id': snapshot.snapshot_id }),
     db.collection('collector_runs').findOne({ ...account, run_id: snapshot.run_id }),
     db.collection('changes').findOne({ ...account, snapshot_id: snapshot.snapshot_id }),
     db.collection('collector_envelopes').findOne({ ...account, run_id: snapshot.run_id })
