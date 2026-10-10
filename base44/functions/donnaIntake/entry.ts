@@ -1,6 +1,7 @@
 import { withDonnaDatabase } from '../../shared/donnaMongo.ts';
 import { requestSchema } from '../../shared/donnaValidation.ts';
 import { listDeals, getCompany } from '../../shared/donnaReads.ts';
+import { getBook } from '../../shared/donnaBook.ts';
 import { createDeals } from '../../shared/donnaDealWrites.ts';
 import { findCandidates, resolveDeal, recordAndResolve, keepUnresolved } from '../../shared/donnaResolution.ts';
 export default async function(req) {
@@ -10,7 +11,7 @@ export default async function(req) {
       await db.command({ ping: 1 });
       return { ok: true, connected: true, authenticated: true, ping: 'passed', note: 'Read-only connection check; no records were read or written. Collection permissions and database existence are not verified.' };
     }
-    const handlers = { listDeals, createDeals, findCandidates, resolveDeal, recordAndResolve, keepUnresolved, getCompany };
+    const handlers = { getBook, listDeals, createDeals, findCandidates, resolveDeal, recordAndResolve, keepUnresolved, getCompany };
     return await handlers[input.action](db, user, input);
   });
 }

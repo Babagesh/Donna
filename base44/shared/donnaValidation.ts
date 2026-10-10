@@ -17,6 +17,7 @@ export const idSchema = text(100);
 export const reasonSchema = z.string().trim().min(10, 'Explain your manual decision in at least 10 characters.').max(1000);
 export const requestSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('testConnection') }).strict(),
+  z.object({ action: z.literal('getBook'), search: z.string().trim().max(200).optional(), sort: z.enum(['name', 'value', 'agreements']).optional(), cursor: z.string().regex(/^\d{1,7}$/).optional() }).strict(),
   z.object({ action: z.literal('listDeals'), status: z.enum(['all', 'unresolved', 'needs_review', 'resolved']).optional(), cursor: idSchema.optional() }).strict(),
   z.object({ action: z.literal('createDeals'), rows: z.array(dealSchema).min(1).max(100), request_id: z.string().uuid() }).strict(),
   z.object({ action: z.literal('findCandidates'), deal_id: idSchema, search: z.string().trim().min(1).max(200).optional() }).strict(),

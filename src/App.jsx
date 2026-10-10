@@ -23,6 +23,7 @@ import ResetPassword from '@/pages/ResetPassword';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Navigate } from 'react-router-dom';
 import LiveIntake from '@/pages/LiveIntake';
+import LiveBook from '@/pages/LiveBook';
 import LiveReview from '@/pages/LiveReview';
 import LiveCompany from '@/pages/LiveCompany';
 import ClerkGate from '@/components/donna/live/ClerkGate';
@@ -71,6 +72,7 @@ const AuthenticatedApp = () => {
       <Route element={<ProtectedRoute unauthenticatedElement={<Navigate to="/login?returnTo=%2Flive-intake" replace />} />}>
         <Route element={<ClerkGate />}>
           <Route element={<WorkspaceLayout />}>
+            <Route path="/live-book" element={<LiveBook />} />
             <Route path="/live-intake" element={<LiveIntake />} />
             <Route path="/live-review" element={<LiveReview />} />
             <Route path="/live-company/:id" element={<LiveCompany />} />
