@@ -126,8 +126,8 @@ const AuthenticatedApp = () => {
           sign-in this app uses. */}
       <Route element={<WorkspaceLayout />}>
         <Route element={<ClerkGate />}>
-          <Route path="/sign-in" element={<Navigate to="/" replace />} />
-          <Route path="/sign-up" element={<Navigate to="/" replace />} />
+          <Route path="/sign-in/*" element={<Navigate to="/" replace />} />
+          <Route path="/sign-up/*" element={<Navigate to="/" replace />} />
           <Route path="/deals" element={<DealDashboard />} />
           <Route path="/deals/:id" element={<DealDetail />} />
           <Route path="/live-book" element={<LiveBook />} />

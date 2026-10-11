@@ -10,7 +10,7 @@
 // rather than throw -- see ClerkRoot, which renders without a ClerkProvider,
 // and WorkspaceFrame, which must not call Clerk hooks when there is no
 // provider above it.
-export const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || '';
+export const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_d2VsbC1zY3VscGluLTg4MTMuY2xlcmsuYWNjb3VudHMuZGV2JA';
 
 /** True when Clerk is configured, so callers can avoid its hooks when it is not. */
 export const CLERK_ENABLED = Boolean(CLERK_PUBLISHABLE_KEY);
