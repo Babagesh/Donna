@@ -1,12 +1,12 @@
 /**
  * Throwaway verification for the exposure rollup. Run:
- *   deno run --allow-net base44/shared/donnaExposure.verify.ts
+ *   deno run --allow-net tools/donnaExposure.verify.ts
  *
  * Exists because the rollup is arithmetic a reviewer must be able to redo on
  * paper, so the figures below are written as literals and checked, not eyeballed.
  */
-import { getBookExposure, abbreviateUsd, exposureHeadline } from './donnaExposure.ts';
-import { lookupRequestSchema, requestSchema } from './donnaValidation.ts';
+import { getBookExposure, abbreviateUsd, exposureHeadline } from '../base44/shared/donnaExposure.ts';
+import { lookupRequestSchema, requestSchema } from '../base44/shared/donnaValidation.ts';
 
 let failures = 0;
 function check(label: string, actual: unknown, expected: unknown) {
