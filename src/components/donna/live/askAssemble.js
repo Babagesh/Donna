@@ -85,7 +85,7 @@ function scopeSentence(names, total, asOf, searched, storedTotal) {
       ? names[0] || 'one recorded counterparty'
       : `${total} counterparties in your book (${names.slice(0, 4).join(', ')}${total > 4 ? `, and ${total - 4} more` : ''})`;
   const when = asOf ? `as of the most recent successful check, ${asOf}` : 'no successful check is recorded, so there is no "as of" time';
-  const depth = `searched ${searched} of ${storedTotal} stored ${storedTotal === 1 ? 'signal' : 'signals'}`;
+  const depth = `searched ${searched} stored ${searched === 1 ? 'signal' : 'signals'} in this scope${storedTotal > searched ? `, of ${storedTotal} stored for your account` : ''}`;
   return `Scope: ${who} · ${when} · ${depth} · retrieved from stored records with their citations, not findings generated for this answer.`;
 }
 
@@ -194,7 +194,7 @@ export function assembleAsk(input) {
   if (plan.kind === 'terms' && !rows.some(row => row.signal)) notes.push(ASK_COPY.noTerms);
   if (untracked) notes.push(ASK_COPY.untracked(untracked));
   if (plan.kind === 'evidence' && !evidenceRefs.length && items.length) notes.push(ASK_COPY.noExcerpt);
-  if (baselineExcluded > 0) notes.push(ASK_COPY.baseline(baselineExcluded));
+  if (baselineExcluded > 0 && plan.kind !== 'coverage') notes.push(ASK_COPY.baseline(baselineExcluded));
   if (matched.length > items.length) notes.push(`${matched.length - items.length} further matching ${matched.length - items.length === 1 ? 'record is' : 'records are'} stored beyond the ${MAX_ITEMS} shown.`);
   if (rowsHidden) notes.push(`${rowsHidden} further watched ${rowsHidden === 1 ? 'term is' : 'terms are'} recorded beyond the rows shown.`);
 
