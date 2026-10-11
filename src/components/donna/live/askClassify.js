@@ -104,10 +104,13 @@ export function classifyAsk(question) {
   const evidenceQuestion = hits(EVIDENCE, text) || Boolean(quoted);
   const types = TYPE_RULES.filter(([, pattern]) => pattern.test(text)).map(([type]) => type);
   const sources = sourceCatalog.filter(source => new RegExp(`\\b${source.id}\\b`).test(text) || text.includes(source.label.toLowerCase())).map(source => source.id);
-  const keywords = askTokens(text);
+  // "recent", "changed", "latest" and friends narrow nothing, so they are not keywords:
+  // left in, "show me recent litigation" would also return every unrelated signal.
+  const keywords = askTokens(text).filter(word => !BROAD.test(word));
   const kind = verdict ? 'verdict' : termsQuestion ? 'terms' : coverageQuestion ? 'coverage' : evidenceQuestion ? 'evidence' : 'topic';
-  // A verdict question still shows observations, so it needs the same broad retrieval.
-  const broad = verdict || BROAD.test(text) || (!types.length && !sources.length && !keywords.length);
+  // Nothing to narrow by means every observed signal in scope. A verdict question is
+  // always broad: the refusal is followed by the stored observations, not by a subset.
+  const broad = verdict || (!types.length && !sources.length && !keywords.length);
   return { question: raw, kind, verdict, termsQuestion, coverageQuestion, evidenceQuestion, quoted, types, sources, keywords, broad };
 }
 
