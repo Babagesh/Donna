@@ -10,7 +10,22 @@ const demoLinks=[['/demo','Sample book',BookOpen],['/briefings','Sample briefing
 const liveLinks=[['/','Book',BookOpen],['/live-briefings','Briefings',FileText],['/live-coverage','Source coverage',Layers3],['/deals','Agreements',LayoutGrid],['/live-intake','Add deals',Inbox],['/live-review','Entity review',ListChecks]];
 export default function WorkspaceFrame(){
  const [open,setOpen]=useState(false);const {pathname}=useLocation();const {deals}=useDemo();const reviews=deals.filter(d=>d.status==='needs_review').length;
- const {user}=useUser();
+ const {user,isLoaded,isSignedIn}=useUser();
+ /*
+  * One exception to rendering the chrome, and it exists so that WorkspaceLayout
+  * can sit OUTSIDE ClerkGate on `/` without wrecking the landing page.
+  *
+  * The layout has to be outside the gate, or the gate's waiting states --
+  * loading, Clerk sign-in, second factor -- render with no sidebar and the app
+  * looks unnavigable. But `/` signed out is the public landing page, which
+  * brings its own header and brand and is emphatically not a "PRIVATE
+  * WORKSPACE": wrapping it in this frame would double the brand and mislabel
+  * it. So for that one state the frame steps aside and renders the page alone.
+  *
+  * While Clerk is still loading we keep the chrome, so the gate's "Loading
+  * sign-in" state is navigable, as are the signed-in states after it.
+  */
+ if(pathname==='/'&&isLoaded&&!isSignedIn) return <Outlet/>;
  // `/deals` exactly must count as live. Matching only '/deals/' meant the deal
  // list rendered the FICTIONAL DEMO sidebar on a page showing real records --
  // the one confusion this product cannot afford.
