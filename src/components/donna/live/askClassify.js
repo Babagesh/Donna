@@ -56,7 +56,10 @@ const EVIDENCE = [
   /\b(show me the source|where did this come from|where did that come from|where did it come from|where does this come from|source for|source of|back this up|raw text|source text)\b/
 ];
 
-/** Topic to stored signal type. Matched against `signal.type` and the stored text. */
+/**
+ * Topic to stored signal type. Matched against `signal.type` and the stored text.
+ * @type {[string, RegExp][]}
+ */
 const TYPE_RULES = [
   ['litigation', /\b(litigation|litigious|lawsuit|lawsuits|sued|suing|court|courts|claim|claims|docket|writ|summons|injunction|tribunal|defendant|plaintiff|filed against)\b/],
   ['exec_departure', /\b(cfo|ceo|coo|cto|cmo|cio|chair|chairman|chairwoman|officer|officers|executive|executives|leadership|depart|departed|departure|departures|resign|resigned|resignation|stepped down|succession|key person)\b/],
