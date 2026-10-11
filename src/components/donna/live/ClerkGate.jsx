@@ -21,7 +21,14 @@ export default function ClerkGate() {
   }
 
   return (
-    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} afterSignOutUrl="/">
+    <ClerkProvider
+      publishableKey={CLERK_PUBLISHABLE_KEY}
+      signInUrl={`${window.location.origin}/`}
+      signUpUrl={`${window.location.origin}/sign-up`}
+      signInFallbackRedirectUrl={`${window.location.origin}/`}
+      signUpFallbackRedirectUrl={`${window.location.origin}/`}
+      afterSignOutUrl="/"
+    >
       <ClerkSession>
         <Outlet />
       </ClerkSession>
