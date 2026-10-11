@@ -20,8 +20,6 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import LoginRedirect from '@/components/donna/live/LoginRedirect';
 import DealDashboard from '@/pages/DealDashboard';
 import DealDetail from '@/pages/DealDetail';
 import LiveIntake from '@/pages/LiveIntake';
@@ -36,11 +34,32 @@ import ClerkGate from '@/components/donna/live/ClerkGate';
 import ClerkRoot from '@/components/donna/live/ClerkRoot';
 import Landing from '@/pages/Landing';
 
+// Base44's own auth pages. They are the ONLY thing left in this app that
+// depends on Base44's session state, and nothing routes anyone to them.
+const BASE44_AUTH_PAGES = ['/login', '/register', '/forgot-password', '/reset-password'];
+
+/*
+ * Clerk is the ONLY sign-in.
+ *
+ * There used to be a Base44 gate in front of the Clerk gate: ProtectedRoute
+ * (Base44 auth) wrapped the live routes, so a user signed in twice and then
+ * verified a second factor -- three steps where one does the job, and the
+ * extra one read like a loop. Base44's auth did no work Clerk does not already
+ * do: it only supplied the user id that became `book_id`, and the Clerk
+ * subject is that id now. So ProtectedRoute and LoginRedirect are gone from
+ * these routes, and the only gate left is ClerkGate.
+ *
+ * This component also used to block the WHOLE app -- public landing page and
+ * fictional sample book included -- behind a Base44 `auth.me()` round trip,
+ * and could replace it outright with UserNotRegisteredError. Both are now
+ * scoped to the Base44 auth pages below, so every other route renders without
+ * waiting on, or being refused by, a sign-in the app no longer uses.
+ */
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
+  const onBase44AuthPage = BASE44_AUTH_PAGES.includes(window.location.pathname);
 
-  // Show loading spinner while checking app public settings or auth
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  if (onBase44AuthPage && (isLoadingPublicSettings || isLoadingAuth)) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
@@ -48,13 +67,8 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors
-  if (authError) {
-    if (authError.type === 'user_not_registered' && ['/login', '/register', '/forgot-password', '/reset-password'].includes(window.location.pathname)) {
-      return <UserNotRegisteredError />;
-    }
-    // Keep public auth pages reachable when a session is absent or expired.
-    // ProtectedRoute handles access to private pages without redirecting login to itself.
+  if (onBase44AuthPage && authError?.type === 'user_not_registered') {
+    return <UserNotRegisteredError />;
   }
 
   // Render the main app
@@ -75,11 +89,41 @@ const AuthenticatedApp = () => {
         <Route path="/coverage" element={<Coverage />} />
         <Route path="/plan" element={<Plan />} />
       </Route>
-      <Route element={<ClerkGate unauthenticatedElement={<Landing />} />}>
-        <Route element={<WorkspaceLayout />}>
+      {/* `/` serves the landing page to a visitor and the monitoring book once
+          they are signed in AND past the second factor. One URL, correct content
+          for each state: the book never loads before MFA, and the landing is
+          reachable without an account.
+
+          `unauthenticatedElement={<Landing />}` is what keeps the first half of
+          that true. It used to be a ProtectedRoute prop; now ClerkGate passes it
+          to ClerkSession, which returns it instead of the Clerk sign-in form when
+          nobody is signed in. Without it a visitor to `/` lands on a sign-in form
+          and the public landing page becomes unreachable. */}
+      {/* WorkspaceLayout sits OUTSIDE ClerkGate on purpose.
+
+          The gate has three waiting states -- loading, Clerk sign-in, and the
+          second factor -- and a user can legitimately sit in one of them for a
+          while, in particular on the second factor with nothing enrolled yet.
+          With the layout inside the gate, every one of those states rendered
+          with no sidebar, so the first page you land on offered no way to go
+          anywhere at all. Keeping the layout outside means navigation always
+          works, including back out to the unauthenticated sample pages, while
+          the main area shows whatever the gate needs.
+
+          The one state that must NOT get the workspace chrome is the landing
+          page, which carries its own header and is not a private workspace.
+          WorkspaceFrame drops its chrome for exactly that case; see the comment
+          there. */}
+      <Route element={<WorkspaceLayout />}>
+        <Route element={<ClerkGate unauthenticatedElement={<Landing />} />}>
           <Route path="/" element={<LiveBook />} />
         </Route>
       </Route>
+      {/* No `unauthenticatedElement` here: these are deep links into live data
+          and a dedicated sign-in route, so a visitor should land on step 1 of
+          the Clerk sign-in, which is what ClerkSession renders by default. This
+          block used to redirect to Base44's `/login`, which is no longer a
+          sign-in this app uses. */}
       <Route element={<WorkspaceLayout />}>
         <Route element={<ClerkGate />}>
           <Route path="/sign-in" element={<Navigate to="/" replace />} />
