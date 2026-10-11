@@ -15,8 +15,8 @@ import { verifyClerkSession } from './donnaClerk.ts';
  * verifyClerkSession() in donnaClerk.ts is the whole check. It proves, against
  * the issuer's live JWKS: a valid unexpired RS256 token with exp/iat/sub/sid;
  * an active, non-impersonated session (no `sts: 'pending'`, no `act`); the
- * calling origin (`azp`). MFA is not required; every action still needs a
- * valid Clerk session, and the verified subject determines the private book.
+ * calling origin (`azp`), and a verified second factor (`fva[1] >= 0`). Every
+ * action requires MFA, and the verified subject determines the private book.
  *
  * Nothing was migrated, and nothing needed to be: `donna_auth_links` was empty,
  * so no identity had ever been recorded against this database. Records written
@@ -48,8 +48,8 @@ export async function withDonnaDatabase(req, run) {
      * keeping now that a book starts empty by definition; (b) there is no role
      * left to gate it with, and leaving it reachable with NO check would make
      * an unauthenticated caller able to probe the database connection. A
-     * valid Clerk session is required, but this action does not establish an
-     * administrator role or require paid MFA.
+     * valid Clerk session with MFA is required. This action does not establish
+     * an administrator role.
      */
     const bookId = await verifyClerkSession(clerkToken, req.headers.get('origin'));
     const uri = secrets.get('MONGODB_URI');

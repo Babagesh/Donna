@@ -1,21 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { TaskChooseOrganization, TaskResetPassword, TaskSetupMFA, useSession } from '@clerk/clerk-react';
 import ClerkAuthForm from '@/components/donna/live/ClerkAuthForm';
+import ClerkMfaVerification from '@/components/donna/live/ClerkMfaVerification';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { setLiveTokenProvider } from '@/components/donna/live/liveApi';
-// Clerk sign-in protects live views; MFA is not required by this app.
+// Clerk sign-in and a verified second factor are required for live views.
 export default function ClerkSession({ children, unauthenticatedElement }) {
   const { session, isLoaded, isSignedIn } = useSession();
   const accountSession = session?.id || null;
   const { pathname } = useLocation();
   const cache = useQueryClient();
   const [ready, setReady] = useState(null);
+  const [verifiedSession, setVerifiedSession] = useState(null);
+  const factorAge = session?.factorVerificationAge?.[1];
+  const mfaVerified = Boolean(accountSession) && ((Number.isInteger(factorAge) && factorAge >= 0) || verifiedSession === accountSession);
   useEffect(() => {
-    setLiveTokenProvider(session?.status === 'active' ? () => session.getToken({ skipCache: true }) : null);
-    setReady(accountSession);
+    const authorized = session?.status === 'active' && mfaVerified;
+    setLiveTokenProvider(authorized ? () => session.getToken({ skipCache: true }) : null);
+    setReady(authorized ? accountSession : null);
     return () => { setLiveTokenProvider(null); cache.removeQueries({ queryKey: ['donna-live'] }); };
-  }, [accountSession, session?.status, cache]);
+  }, [accountSession, session?.status, mfaVerified, cache]);
   if (!isLoaded) return <div className="page-container" role="status">Loading sign-in…</div>;
   const task = session?.currentTask?.key;
   if (task === 'choose-organization') return <TaskChooseOrganization redirectUrlComplete="/" />;
@@ -29,6 +34,7 @@ export default function ClerkSession({ children, unauthenticatedElement }) {
   if (!isSignedIn && !pathname.startsWith('/sign-in')) return <Navigate to="/sign-in" replace />;
   if (!isSignedIn) return <ClerkAuthForm />;
   if (session?.status !== 'active') return <p role="status">Completing Clerk account setup…</p>;
+  if (!mfaVerified) return <ClerkMfaVerification key={accountSession} onVerified={setVerifiedSession} />;
   if (ready !== accountSession) return <div className="page-container" role="status">Preparing secure access…</div>;
   return children;
 }

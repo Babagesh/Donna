@@ -20,5 +20,6 @@ export async function verifyClerkSession(token, origin) {
   }
   if (typeof payload.sub !== 'string' || typeof payload.sid !== 'string' || payload.sts === 'pending' || payload.act) throw new RequestError('An active, non-impersonated Clerk session is required.', 403);
   if (origin && payload.azp !== origin) throw new RequestError('The Clerk session does not belong to this application origin.', 403);
+  if (!Array.isArray(payload.fva) || !Number.isInteger(payload.fva[1]) || payload.fva[1] < 0) throw new RequestError('Verify your authenticator or backup code before accessing your companies and deals.', 403);
   return payload.sub;
 }

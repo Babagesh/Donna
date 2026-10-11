@@ -11,7 +11,7 @@ export default async function(req) {
     if (input.action === 'testConnection') {
       await db.command({ ping: 1 });
       // Reaching here means the Clerk session was verified, exactly as for
-      // every other action. MFA is not required. The only write is the
+      // every other action, including second-factor verification. The only write is the
       // `donna_books` registry upsert that withDonnaDatabase performs for any
       // verified request, so this check is no longer strictly read-only.
       return { ok: true, connected: true, authenticated: true, ping: 'passed', note: 'Connection check; no agreement, company or signal records were read or written. Collection permissions beyond the book registry, and database existence, are not verified.' };
