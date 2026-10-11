@@ -59,6 +59,12 @@ check('value by tier', r.value_by_top_tier, { tier1: 820000, tier2: 400000, tier
 check('exposure unknown value', r.value_exposure_unknown, 300000);
 check('exposure unknown companies', r.companies_exposure_unknown, 1);
 check('hard to replace', r.value_hard_to_replace, 820000);
+// Big Lots ends 2026-12-01 with 90 days notice -> the window shut 2026-09-02,
+// already past, so it counts (a shut window is worse, not better). Express
+// (deadline 2027-05-02) and Dana (2027-11-02) are far out; Smucker has no
+// notice_days so it cannot be assessed and is excluded rather than assumed.
+check('notice window closing', r.value_notice_window_closing, 820000);
+check('notice window threshold', r.notice_window_days, 90);
 // Rule 3: every company has regulator+layoffs failed, so the whole book sits behind each.
 check('behind regulator', r.value_behind_failed_source.regulator, 1700000);
 check('behind layoffs', r.value_behind_failed_source.layoffs, 1700000);
