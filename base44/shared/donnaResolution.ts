@@ -23,10 +23,31 @@ export async function findCandidates(db, user, input) {
   const matches = await db.collection('companies').find(query).sort({ canonical_name: 1 }).limit(21).maxTimeMS(10000).toArray();
   const candidates = matches.slice(0, 20).map(publicCompany);
   const now = new Date().toISOString();
-  const reason = 'Candidates come only from legal entities previously recorded in your book. No external registry lookup or automatic match was performed.';
-  const updated = await db.collection('deals').findOneAndUpdate({ book_id: user.id, deal_id: deal.deal_id, status: { $in: ['unresolved', 'needs_review'] } }, { $set: { status: 'needs_review', resolution: { confidence: null, reason, resolved_by: null, candidates_seen: candidates }, updated_date: now } }, { returnDocument: 'after' });
+  const reason = 'Searched the legal entities already recorded in your book. This is not a registry lookup: the automated registry search runs on its own and records its candidates here.';
+  /*
+   * MERGE the local matches into whatever is already recorded rather than
+   * replacing the resolution subdocument.
+   *
+   * This used to $set `resolution` wholesale, which destroyed the automated
+   * resolution: the orchestrator searches an external registry, records its
+   * candidates and its reason, and one click of this button wiped all of it and
+   * replaced it with a search of the user's own book -- which, for anyone being
+   * onboarded, is empty. The result was a deal that looked unresolvable and a
+   * message saying no registry lookup had happened, when one had.
+   *
+   * `auto_resolver`'s candidates are kept and the local ones appended, deduped
+   * on company_id. An automated `confidence` is preserved so the review list can
+   * still show how sure the match was.
+   */
+  const existing = Array.isArray(deal.resolution?.candidates_seen) ? deal.resolution.candidates_seen : [];
+  const seen = new Set(existing.map(c => c.company_id || c.registry_id).filter(Boolean));
+  const merged = [...existing, ...candidates.filter(c => !seen.has(c.company_id) && !seen.has(c.registry_id))];
+  const autoReason = deal.resolution?.resolved_by === 'auto_resolver' && deal.resolution?.reason
+    ? `${deal.resolution.reason} ${reason}`
+    : reason;
+  const updated = await db.collection('deals').findOneAndUpdate({ book_id: user.id, deal_id: deal.deal_id, status: { $in: ['unresolved', 'needs_review'] } }, { $set: { status: 'needs_review', resolution: { confidence: deal.resolution?.confidence ?? null, reason: autoReason, resolved_by: deal.resolution?.resolved_by ?? null, candidates_seen: merged }, updated_date: now } }, { returnDocument: 'after' });
   if (!updated) throw new RequestError('The deal changed. Refresh before trying again.', 409);
-  return { deal: publicDeal(updated), candidates, has_more: matches.length > 20 };
+  return { deal: publicDeal(updated), candidates: merged, has_more: matches.length > 20 };
 }
 export async function resolveDeal(db, user, input) {
   const reason = reasonSchema.parse(input.reason);
