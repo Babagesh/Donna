@@ -111,7 +111,12 @@ export function assembleAsk(input) {
   const baselineExcluded = scopedSignals.length - observed.length;
 
   const matched = plan.kind === 'coverage' ? [] : observed.filter(signal => matchesPlan(signal, plan, nameOf(signal.company_id)));
-  const items = matched.slice(0, MAX_ITEMS);
+  // A question asking where something came from still wants stored excerpts, so when its
+  // words match nothing it falls back to the newest records and says so, rather than
+  // leaving the impression that no excerpt is stored at all.
+  const evidenceFallback = plan.kind === 'evidence' && !plan.quoted && !matched.length && observed.length > 0;
+  const ranked = evidenceFallback ? observed : matched;
+  const items = ranked.slice(0, MAX_ITEMS);
 
   // Watched-term join: what was signed, against what a stored signal says it touches.
   const scopedDeals = allDeals.filter(deal => inFocus(deal?.company_id));
@@ -176,7 +181,7 @@ export function assembleAsk(input) {
 
   const framing = plan.verdict ? ASK_COPY.verdict
     : plan.kind === 'coverage' ? ASK_COPY.coverage
-      : plan.kind === 'terms' ? ASK_COPY.terms
+      : plan.kind === 'terms' && rows.length ? ASK_COPY.terms
         : plan.kind === 'evidence' && evidenceRefs.length ? ASK_COPY.evidence
           : hasResult ? ASK_COPY.matches
             : ASK_COPY.none;
@@ -193,9 +198,10 @@ export function assembleAsk(input) {
   }
   if (plan.kind === 'terms' && !rows.some(row => row.signal)) notes.push(ASK_COPY.noTerms);
   if (untracked) notes.push(ASK_COPY.untracked(untracked));
+  if (evidenceFallback) notes.push(ASK_COPY.evidenceFallback);
   if (plan.kind === 'evidence' && !evidenceRefs.length && items.length) notes.push(ASK_COPY.noExcerpt);
   if (baselineExcluded > 0 && plan.kind !== 'coverage') notes.push(ASK_COPY.baseline(baselineExcluded));
-  if (matched.length > items.length) notes.push(`${matched.length - items.length} further matching ${matched.length - items.length === 1 ? 'record is' : 'records are'} stored beyond the ${MAX_ITEMS} shown.`);
+  if (ranked.length > items.length) notes.push(`${ranked.length - items.length} further matching ${ranked.length - items.length === 1 ? 'record is' : 'records are'} stored beyond the ${MAX_ITEMS} shown.`);
   if (rowsHidden) notes.push(`${rowsHidden} further watched ${rowsHidden === 1 ? 'term is' : 'terms are'} recorded beyond the rows shown.`);
 
   return {
