@@ -80,16 +80,26 @@ const AuthenticatedApp = () => {
           they are signed in AND past the second factor. One URL, correct content
           for each state: the book never loads before MFA, and the landing is
           reachable without an account. */}
+      {/* WorkspaceLayout sits OUTSIDE ClerkGate on purpose.
+
+          The gate has three waiting states -- loading, Clerk sign-in, and the
+          second factor -- and Clerk sign-in is separate from Base44 sign-in, so
+          a user can legitimately sit in one of them for a while. With the layout
+          inside the gate, every one of those states rendered with no sidebar, so
+          the first page you land on offered no way to go anywhere at all.
+          Keeping the layout outside means navigation always works, including
+          back out to the unauthenticated sample pages, while the main area shows
+          whatever the gate needs. */}
       <Route element={<ProtectedRoute unauthenticatedElement={<Landing />} />}>
-        <Route element={<ClerkGate />}>
-          <Route element={<WorkspaceLayout />}>
+        <Route element={<WorkspaceLayout />}>
+          <Route element={<ClerkGate />}>
             <Route path="/" element={<LiveBook />} />
           </Route>
         </Route>
       </Route>
       <Route element={<ProtectedRoute unauthenticatedElement={<LoginRedirect />} />}>
-        <Route element={<ClerkGate />}>
-          <Route element={<WorkspaceLayout />}>
+        <Route element={<WorkspaceLayout />}>
+          <Route element={<ClerkGate />}>
             <Route path="/deals" element={<DealDashboard />} />
             <Route path="/deals/:id" element={<DealDetail />} />
             <Route path="/live-book" element={<LiveBook />} />
