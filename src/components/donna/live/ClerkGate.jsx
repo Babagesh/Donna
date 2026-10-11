@@ -4,7 +4,15 @@ import { ClerkProvider } from '@clerk/clerk-react';
 import { CLERK_PUBLISHABLE_KEY } from '@/lib/clerkConfig';
 import ClerkSession from '@/components/donna/live/ClerkSession';
 
-export default function ClerkGate() {
+/*
+ * The gate. Clerk is the only sign-in, so nothing stands in front of this.
+ *
+ * `unauthenticatedElement` is handed straight to ClerkSession: it is what an
+ * unauthenticated visitor sees instead of the sign-in form. `/` passes the
+ * public landing page, which is the behaviour Base44's ProtectedRoute used to
+ * provide before it was removed. Omit it and a visitor gets the sign-in form.
+ */
+export default function ClerkGate({ unauthenticatedElement }) {
   if (!CLERK_PUBLISHABLE_KEY) {
     return (
       <div className="page-container">
@@ -29,7 +37,7 @@ export default function ClerkGate() {
       signUpFallbackRedirectUrl={`${window.location.origin}/`}
       afterSignOutUrl="/"
     >
-      <ClerkSession>
+      <ClerkSession unauthenticatedElement={unauthenticatedElement}>
         <Outlet />
       </ClerkSession>
     </ClerkProvider>
