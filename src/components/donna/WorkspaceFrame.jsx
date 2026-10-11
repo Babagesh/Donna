@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { BookOpen, FileText, Inbox, ListChecks, Layers3, ArrowUpRight, PanelLeftClose, Menu, X, ChevronDown, ShieldCheck, LayoutGrid, Building2 } from 'lucide-react';
+import { BookOpen, FileText, Inbox, ListChecks, Layers3, ArrowUpRight, PanelLeftClose, Menu, X, ChevronDown, ShieldCheck, LayoutGrid } from 'lucide-react';
 import { useDemo } from '@/components/donna/DemoStore';
 import { useAuth } from '@/lib/AuthContext';
 const demoLinks=[['/demo','Sample book',BookOpen],['/briefings','Sample briefings',FileText],['/intake','Demo deal intake',Inbox],['/review','Demo resolution review',ListChecks],['/coverage','Sample coverage',Layers3],['/','My workspace',LayoutGrid]];
