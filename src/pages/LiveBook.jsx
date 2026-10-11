@@ -10,6 +10,7 @@ import LiveBookTable from '@/components/donna/live/LiveBookTable';
 import AddCompanyDialog from '@/components/donna/live/AddCompanyDialog';
 import RecentBriefings from '@/components/donna/RecentBriefings';
 import CoverageNote from '@/components/donna/CoverageNote';
+import LiveAsk from '@/components/donna/live/LiveAsk';
 import { dateLabel } from '@/components/donna/demoData';
 import { aggregateCoverage, asTier, bookRow, citedLines, coverageSentence, dayOf } from '@/components/donna/live/liveShapes';
 export default function LiveBook() {
@@ -56,6 +57,7 @@ export default function LiveBook() {
       </section>
       <div className="mt-5"><CoverageNote sentence={sentence}/></div>
       <div className="mt-4 flex flex-wrap gap-4"><Link className="text-link" to="/live-coverage">Source coverage matrix <ArrowRight size={13}/></Link><Link className="text-link" to="/live-briefings">All briefings <ArrowRight size={13}/></Link></div>
+      <div className="mt-7"><LiveAsk/></div>
     </>}
   </>;
 }
