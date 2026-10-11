@@ -52,7 +52,7 @@ const TERMS = [
 
 /** Evidence: the stored excerpt, where it came from, and when it was fetched. */
 const EVIDENCE = [
-  /\b(evidence|excerpt|excerpts|snapshot|snapshots|citation|citations|cited|verbatim|quote|quoted|wording|prove|proof|provenance|underlying|original|primary)\b/,
+  /\b(evidence|excerpt|excerpts|snapshot|snapshots|citation|citations|cited|verbatim|quote|quoted|wording|prove|proof|provenance|underlying|original|primary|source|sources)\b/,
   /\b(show me the source|where did this come from|where did that come from|where did it come from|where does this come from|source for|source of|back this up|raw text|source text)\b/
 ];
 
@@ -85,7 +85,8 @@ const STOPWORDS = new Set([
   'find', 'look', 'donna', 'please', 'counterparty', 'counterparties', 'company', 'companies', 'deal', 'deals',
   'agreement', 'agreements', 'signal', 'signals', 'record', 'records', 'stored', 'anything', 'everything',
   'something', 'recent', 'recently', 'latest', 'newest', 'book', 'mine', 'more', 'most', 'some', 'much', 'many',
-  'just', 'only', 'also', 'then', 'than', 'know', 'want', 'need', 'here', 'into', 'onto'
+  'just', 'only', 'also', 'then', 'than', 'know', 'want', 'need', 'here', 'into', 'onto',
+  'come', 'came', 'coming', 'give', 'explain', 'describe', 'again', 'mean', 'means', 'like'
 ]);
 
 const hits = (patterns, text) => patterns.some(pattern => pattern.test(text));
