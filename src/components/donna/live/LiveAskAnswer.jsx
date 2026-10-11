@@ -42,7 +42,9 @@ export default function LiveAskAnswer({ answer, evidence = [], gaps = [] }) {
       </table>
     </div>}
 
-    {Boolean(answer.items.length) && <div className="mb-4"><SignalList signals={answer.items} base="/live-"/></div>}
+    {/* The watched-term table already carries its own citations, so the flat signal list
+        is the answer only when there is no table — the same precedence as the fixture. */}
+    {!answer.rows.length && Boolean(answer.items.length) && <div className="mb-4"><SignalList signals={answer.items} base="/live-"/></div>}
 
     {evidence.map(record => <div className="answer-citation" key={record.snapshot_id}>
       <span className="text-[10px] uppercase tracking-widest">Stored excerpt · {record.source_label} · {record.trust} trust</span>
