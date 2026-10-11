@@ -88,16 +88,23 @@ function exposureUnknown(deal: Record<string, unknown>): boolean {
  */
 export function exposureHeadline(r: {
   contracted_value_usd: { total: number };
-  counterparties: { monitored: number };
+  counterparties: { with_agreements: number };
   sources_checked: number;
   value_by_top_tier: { tier1: number };
   value_exposure_unknown: number;
   not_covered: string[];
 }): string {
   const parts: string[] = [];
+  // COUNT THE COMPANIES THE MONEY IS ACTUALLY SPREAD ACROSS, not every company
+  // being monitored. This used to read `monitored`, which on a real book said
+  // "$12.5M contracted across 34 counterparties" when only 8 of those 34 had an
+  // agreement -- true of the monitoring, false of the money, and the sentence
+  // is about the money. A reader dividing the total by the count has to land on
+  // a real average agreement size.
+  const n = r.counterparties.with_agreements;
   parts.push(
-    `${abbreviateUsd(r.contracted_value_usd.total)} contracted across ${r.counterparties.monitored} ` +
-    `${r.counterparties.monitored === 1 ? 'counterparty' : 'counterparties'}, ` +
+    `${abbreviateUsd(r.contracted_value_usd.total)} contracted across ${n} ` +
+    `${n === 1 ? 'counterparty' : 'counterparties'}, ` +
     `watched on ${r.sources_checked} of 8 sources.`,
   );
   if (r.value_by_top_tier.tier1 > 0) {
@@ -178,6 +185,7 @@ export async function getBookExposure(db, user, _input) {
   const checkedSources = new Set<string>();
   let monitored = 0;
   let lookupOnly = 0;
+  let withAgreements = 0;
   let companiesExposureUnknown = 0;
   let largest: Record<string, unknown> | null = null;
   let largestValue = -1;
@@ -189,6 +197,7 @@ export async function getBookExposure(db, user, _input) {
 
     if (company.monitoring_since) monitored += 1;
     else if (company.lookup) lookupOnly += 1;
+    if (linked.length > 0) withAgreements += 1;
 
     const tier = Number(company.top_tier ?? 0);
     if (tier === 1) byTier.tier1 += companyValue;
@@ -197,8 +206,12 @@ export async function getBookExposure(db, user, _input) {
     else byTier.none += companyValue;
 
     for (const source of company.coverage?.checked ?? []) checkedSources.add(String(source));
-    // Rule 3: dollars per unreachable source, by name.
+    // Rule 3: dollars per unreachable source, by name. A source is recorded
+    // only once there is value behind it: a failed source on a company with no
+    // agreement is a real coverage gap but carries no money, and printing it as
+    // "$0" reads as a priced gap rather than an unpriced one.
     for (const source of company.coverage?.failed ?? []) {
+      if (companyValue <= 0) continue;
       const key = String(source);
       behindFailedSource[key] = (behindFailedSource[key] ?? 0) + companyValue;
     }
@@ -233,7 +246,13 @@ export async function getBookExposure(db, user, _input) {
   const rollup = {
     book_id: user.id,
     as_of: now.toISOString(),
-    counterparties: { total: companies.length, monitored, lookup_only: lookupOnly },
+    counterparties: {
+      total: companies.length,
+      monitored,
+      lookup_only: lookupOnly,
+      /** Companies with at least one resolved agreement -- what the headline counts. */
+      with_agreements: withAgreements,
+    },
     contracted_value_usd: contracted,
     value_by_top_tier: byTier,
     value_notice_window_closing: valueNoticeClosing,
