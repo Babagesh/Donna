@@ -45,7 +45,7 @@ const COVERAGE = [
 
 /** Watched terms: the join between what a deal signed and what a signal touches. */
 const TERMS = [
-  /\b(watch term|watch terms|watched term|watched terms|term|terms|clause|clauses|covenant|covenants)\b/,
+  /\b(watch|watched|watching|term|terms|clause|clauses|covenant|covenants)\b/,
   /\b(which deals|what deals|which agreements|what agreements|deals affected|affected|impacted|touched|touches|touch)\b/,
   /\b(key person|key_person|keyperson|change of control|change_of_control|litigation cap|assignment|novation|exclusivity|most favoured|most favored|mfn|indemnity|indemnification|notice period|termination right|service level|sla)\b/
 ];
@@ -72,6 +72,11 @@ const TYPE_RULES = [
 
 /** "What changed recently" style questions: every observed signal in scope, no narrowing. */
 const BROAD = /\b(recent|recently|latest|newest|new|changed|change|changes|signal|signals|observation|observations|observed|happened|anything|everything|update|updates|news|timeline|activity)\b/;
+
+/** Every word that routes a question. These describe the request, not its subject, so
+ *  they must not also be matched against the text of a stored record: "show me the
+ *  source" is a request for an excerpt, not a search for the word "source". */
+const ROUTE_WORDS = [...VERDICT, ...COVERAGE, ...TERMS, ...EVIDENCE, BROAD];
 
 const STOPWORDS = new Set([
   'what', 'which', 'when', 'where', 'whom', 'whose', 'that', 'this', 'these', 'those', 'have', 'have', 'has', 'had',
@@ -104,9 +109,9 @@ export function classifyAsk(question) {
   const evidenceQuestion = hits(EVIDENCE, text) || Boolean(quoted);
   const types = TYPE_RULES.filter(([, pattern]) => pattern.test(text)).map(([type]) => type);
   const sources = sourceCatalog.filter(source => new RegExp(`\\b${source.id}\\b`).test(text) || text.includes(source.label.toLowerCase())).map(source => source.id);
-  // "recent", "changed", "latest" and friends narrow nothing, so they are not keywords:
-  // left in, "show me recent litigation" would also return every unrelated signal.
-  const keywords = askTokens(text).filter(word => !BROAD.test(word));
+  // Routing words narrow nothing. Left in as keywords, "show me recent litigation" would
+  // match every unrelated signal and "show me the source" would match no record at all.
+  const keywords = askTokens(text).filter(word => !ROUTE_WORDS.some(pattern => pattern.test(word)));
   const kind = verdict ? 'verdict' : termsQuestion ? 'terms' : coverageQuestion ? 'coverage' : evidenceQuestion ? 'evidence' : 'topic';
   // Nothing to narrow by means every observed signal in scope. A verdict question is
   // always broad: the refusal is followed by the stored observations, not by a subset.
