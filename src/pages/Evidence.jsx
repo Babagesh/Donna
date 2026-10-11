@@ -7,7 +7,7 @@ import { downloadText } from '@/components/donna/intakeUtils';
 import EvidencePayload from '@/components/donna/EvidencePayload';
 export default function Evidence(){
  const {id}=useParams();const record=resolveEvidence(id);const {signal,snapshot,run}=record;
- if(!snapshot)return <div className="empty-state">Evidence not found. <Link to="/">Return to book</Link></div>;
+ if(!snapshot)return <div className="empty-state">Evidence not found. <Link to="/demo">Return to the sample book</Link></div>;
  const company=companies.find(c=>c.id===snapshot.company_id);
  return <><Link to={`/company/${company.id}`} className="back-link"><ArrowLeft size={14}/>Back to {company.name}</Link>
  <div className="page-heading mt-6"><div><div className="page-kicker">SOURCE OF RECORD · SAMPLE EVIDENCE</div><h1>Evidence record</h1><p>{company.name} · {sourceLabel(snapshot.source)} · {snapshot.snapshot_id}</p></div><button className="button-secondary" onClick={()=>downloadText(JSON.stringify({demo:true,...record},null,2),snapshot.snapshot_id+'.json','application/json')}><Download size={14}/>Download record</button></div>
