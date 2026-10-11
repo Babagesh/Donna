@@ -182,6 +182,15 @@ export function assembleAsk(input) {
             : ASK_COPY.none;
 
   const notes = [];
+  // "When was the registry last checked" names a source, so answer for that source.
+  if (plan.kind === 'coverage') {
+    for (const source of plan.sources) {
+      const checkedFor = coverage.filter(row => row.checked.includes(source)).length;
+      const failedFor = coverage.filter(row => row.failed.includes(source)).length;
+      const never = Math.max(0, coverage.length - checkedFor - failedFor);
+      notes.push(`${sourceLabel(source)}: successfully checked for ${checkedFor} of ${coverage.length} ${coverage.length === 1 ? 'counterparty' : 'counterparties'}, recorded as failed for ${failedFor}, and not checked at all for ${never}. An empty check is not proof of absence.`);
+    }
+  }
   if (plan.kind === 'terms' && !rows.some(row => row.signal)) notes.push(ASK_COPY.noTerms);
   if (untracked) notes.push(ASK_COPY.untracked(untracked));
   if (plan.kind === 'evidence' && !evidenceRefs.length && items.length) notes.push(ASK_COPY.noExcerpt);
