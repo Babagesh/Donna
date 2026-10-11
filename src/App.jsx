@@ -32,6 +32,7 @@ import LiveEvidence from '@/pages/LiveEvidence';
 import LiveCoverage from '@/pages/LiveCoverage';
 import ClerkGate from '@/components/donna/live/ClerkGate';
 import ClerkRoot from '@/components/donna/live/ClerkRoot';
+import ClerkAccess from '@/components/donna/live/ClerkAccess';
 import Landing from '@/pages/Landing';
 
 // Base44's own auth pages. They are the ONLY thing left in this app that
@@ -89,45 +90,14 @@ const AuthenticatedApp = () => {
         <Route path="/coverage" element={<Coverage />} />
         <Route path="/plan" element={<Plan />} />
       </Route>
-      {/* `/` serves the landing page to a visitor and the monitoring book once
-          they are signed in AND past the second factor. One URL, correct content
-          for each state: the book never loads before MFA, and the landing is
-          reachable without an account.
-
-          `unauthenticatedElement={<Landing />}` is what keeps the first half of
-          that true. It used to be a ProtectedRoute prop; now ClerkGate passes it
-          to ClerkSession, which returns it instead of the Clerk sign-in form when
-          nobody is signed in. Without it a visitor to `/` lands on a sign-in form
-          and the public landing page becomes unreachable. */}
-      {/* WorkspaceLayout sits OUTSIDE ClerkGate on purpose.
-
-          The gate has three waiting states -- loading, Clerk sign-in, and the
-          second factor -- and a user can legitimately sit in one of them for a
-          while, in particular on the second factor with nothing enrolled yet.
-          With the layout inside the gate, every one of those states rendered
-          with no sidebar, so the first page you land on offered no way to go
-          anywhere at all. Keeping the layout outside means navigation always
-          works, including back out to the unauthenticated sample pages, while
-          the main area shows whatever the gate needs.
-
-          The one state that must NOT get the workspace chrome is the landing
-          page, which carries its own header and is not a private workspace.
-          WorkspaceFrame drops its chrome for exactly that case; see the comment
-          there. */}
+      {/* Authentication pages stay outside the MFA gate so Clerk can finish
+          registration, email verification and OAuth without being interrupted.
+          All live pages share one gate, including the public landing at `/`. */}
       <Route element={<WorkspaceLayout />}>
+        <Route path="/sign-in/*" element={<ClerkAccess />} />
+        <Route path="/sign-up/*" element={<ClerkAccess />} />
         <Route element={<ClerkGate unauthenticatedElement={<Landing />} />}>
           <Route path="/" element={<LiveBook />} />
-        </Route>
-      </Route>
-      {/* No `unauthenticatedElement` here: these are deep links into live data
-          and a dedicated sign-in route, so a visitor should land on step 1 of
-          the Clerk sign-in, which is what ClerkSession renders by default. This
-          block used to redirect to Base44's `/login`, which is no longer a
-          sign-in this app uses. */}
-      <Route element={<WorkspaceLayout />}>
-        <Route element={<ClerkGate />}>
-          <Route path="/sign-in/*" element={<Navigate to="/" replace />} />
-          <Route path="/sign-up/*" element={<Navigate to="/" replace />} />
           <Route path="/deals" element={<DealDashboard />} />
           <Route path="/deals/:id" element={<DealDetail />} />
           <Route path="/live-book" element={<LiveBook />} />

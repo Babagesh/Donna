@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { TaskChooseOrganization, TaskResetPassword, TaskSetupMFA, useSession } from '@clerk/clerk-react';
-import ClerkAuthForm from '@/components/donna/live/ClerkAuthForm';
 import ClerkMfaVerification from '@/components/donna/live/ClerkMfaVerification';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { setLiveTokenProvider } from '@/components/donna/live/liveApi';
 // Clerk sign-in and a verified second factor are required for live views.
 export default function ClerkSession({ children, unauthenticatedElement }) {
-  const { session, isLoaded, isSignedIn } = useSession();
+  const { session, isLoaded } = useSession();
   const accountSession = session?.id || null;
   const { pathname } = useLocation();
   const cache = useQueryClient();
@@ -26,13 +25,9 @@ export default function ClerkSession({ children, unauthenticatedElement }) {
   if (task === 'choose-organization') return <TaskChooseOrganization redirectUrlComplete="/" />;
   if (task === 'reset-password') return <TaskResetPassword redirectUrlComplete="/" />;
   if (task === 'setup-mfa') return <TaskSetupMFA redirectUrlComplete="/" />;
-  if (!isSignedIn && pathname.startsWith('/sign-up')) return <ClerkAuthForm registration />;
-  // An unauthenticated visitor on a route that has public content (`/`) gets
-  // that content, not a sign-in form. This is what Base44's removed
-  // ProtectedRoute `unauthenticatedElement` used to do.
-  if (!isSignedIn && unauthenticatedElement) return unauthenticatedElement;
-  if (!isSignedIn && !pathname.startsWith('/sign-in')) return <Navigate to="/sign-in" replace />;
-  if (!isSignedIn) return <ClerkAuthForm />;
+  // A pending session is not signed out: its setup task above must finish.
+  if (!session && pathname === '/' && unauthenticatedElement) return unauthenticatedElement;
+  if (!session) return <Navigate to="/sign-in" replace />;
   if (session?.status !== 'active') return <p role="status">Completing Clerk account setup…</p>;
   if (!mfaVerified) return <ClerkMfaVerification key={accountSession} onVerified={setVerifiedSession} />;
   if (ready !== accountSession) return <div className="page-container" role="status">Preparing secure access…</div>;
