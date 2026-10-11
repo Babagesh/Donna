@@ -196,7 +196,7 @@ export function assembleAsk(input) {
       notes.push(`${sourceLabel(source)}: successfully checked for ${checkedFor} of ${coverage.length} ${coverage.length === 1 ? 'counterparty' : 'counterparties'}, recorded as failed for ${failedFor}, and not checked at all for ${never}. An empty check is not proof of absence.`);
     }
   }
-  if (plan.kind === 'terms' && !rows.some(row => row.signal)) notes.push(ASK_COPY.noTerms);
+  if (plan.kind === 'terms' && rows.length && !rows.some(row => row.signal)) notes.push(ASK_COPY.noTerms);
   if (untracked) notes.push(ASK_COPY.untracked(untracked));
   if (evidenceFallback) notes.push(ASK_COPY.evidenceFallback);
   if (plan.kind === 'evidence' && !evidenceRefs.length && items.length) notes.push(ASK_COPY.noExcerpt);
