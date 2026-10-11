@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { BookOpen, FileText, Inbox, ListChecks, Layers3, ArrowUpRight, PanelLeftClose, Menu, X, ChevronDown, ShieldCheck, LayoutGrid } from 'lucide-react';
 import { useDemo } from '@/components/donna/DemoStore';
-import { UserButton, useUser } from '@clerk/clerk-react';
+import { UserButton } from '@clerk/clerk-react';
+import useClerkIdentity from '@/components/donna/live/useClerkIdentity';
 const demoLinks=[['/demo','Sample book',BookOpen],['/briefings','Sample briefings',FileText],['/intake','Demo deal intake',Inbox],['/review','Demo resolution review',ListChecks],['/coverage','Sample coverage',Layers3],['/sign-in','Sign in to my book',LayoutGrid]];
 // `/` is the monitoring book once signed in past the second factor; the deal
 // list moved to `/deals`. Both need a link, or the one that isn't the landing
@@ -10,7 +11,9 @@ const demoLinks=[['/demo','Sample book',BookOpen],['/briefings','Sample briefing
 const liveLinks=[['/','Book',BookOpen],['/live-briefings','Briefings',FileText],['/live-coverage','Source coverage',Layers3],['/deals','Agreements',LayoutGrid],['/live-intake','Add deals',Inbox],['/live-review','Entity review',ListChecks]];
 export default function WorkspaceFrame(){
  const [open,setOpen]=useState(false);const {pathname}=useLocation();const {deals}=useDemo();const reviews=deals.filter(d=>d.status==='needs_review').length;
- const {user,isLoaded,isSignedIn}=useUser();
+ // Safe when Clerk is unconfigured: a bare useUser() here threw without a
+ // provider above it, so a missing key whited out every page with chrome.
+ const {user,isLoaded,isSignedIn}=useClerkIdentity();
  /*
   * One exception to rendering the chrome, and it exists so that WorkspaceLayout
   * can sit OUTSIDE ClerkGate on `/` without wrecking the landing page.
