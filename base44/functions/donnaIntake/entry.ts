@@ -7,6 +7,7 @@ import { getBookExposure } from '../../shared/donnaExposure.ts';
 import { requestLookup, getLookup } from '../../shared/donnaLookup.ts';
 import { createDeals } from '../../shared/donnaDealWrites.ts';
 import { findCandidates, resolveDeal, recordAndResolve, keepUnresolved } from '../../shared/donnaResolution.ts';
+import { askDonna } from '../../shared/donnaAsk.ts';
 export default async function(req) {
   return await withDonnaDatabase(req, async (db, user, body) => {
     const input = requestSchema.parse(body);
@@ -18,7 +19,7 @@ export default async function(req) {
       // verified request, so this check is no longer strictly read-only.
       return { ok: true, connected: true, authenticated: true, ping: 'passed', note: 'Connection check; no agreement, company or signal records were read or written. Collection permissions beyond the book registry, and database existence, are not verified.' };
     }
-    const handlers = { getBook, getBookExposure, requestLookup, getLookup, listDeals, getDeal, createCompany, createDeals, findCandidates, resolveDeal, recordAndResolve, keepUnresolved, getCompany, listSignals, getBriefing, listBriefings, getEvidence, listRuns };
+    const handlers = { getBook, getBookExposure, requestLookup, getLookup, listDeals, getDeal, createCompany, createDeals, findCandidates, resolveDeal, recordAndResolve, keepUnresolved, getCompany, listSignals, getBriefing, listBriefings, getEvidence, listRuns, askDonna };
     return await handlers[input.action](db, user, input);
   });
 }
