@@ -1,7 +1,7 @@
 import { MongoClient } from 'npm:mongodb@6.12.0';
 import { secrets } from 'base44:runtime';
 import { requestSchema } from './donnaValidation.ts';
-import { verifyClerkFactor } from './donnaClerk.ts';
+import { verifyClerkSession } from './donnaClerk.ts';
 
 /*
  * Clerk is the ONLY sign-in for this backend.
@@ -12,11 +12,11 @@ import { verifyClerkFactor } from './donnaClerk.ts';
  * the user id that became `book_id` -- so it is gone, and the Clerk subject is
  * now the identity and the book scope.
  *
- * verifyClerkFactor() in donnaClerk.ts is the whole check. It proves, against
+ * verifyClerkSession() in donnaClerk.ts is the whole check. It proves, against
  * the issuer's live JWKS: a valid unexpired RS256 token with exp/iat/sub/sid;
  * an active, non-impersonated session (no `sts: 'pending'`, no `act`); the
- * calling origin (`azp`); and a verified SECOND FACTOR (`fva[1]`). The second
- * factor is still mandatory for every action -- that requirement did not move.
+ * calling origin (`azp`). MFA is not required; every action still needs a
+ * valid Clerk session, and the verified subject determines the private book.
  *
  * Nothing was migrated, and nothing needed to be: `donna_auth_links` was empty,
  * so no identity had ever been recorded against this database. Records written
@@ -48,10 +48,10 @@ export async function withDonnaDatabase(req, run) {
      * keeping now that a book starts empty by definition; (b) there is no role
      * left to gate it with, and leaving it reachable with NO check would make
      * an unauthenticated caller able to probe the database connection. A
-     * verified Clerk session is a strictly higher bar than the old admin role
-     * was, because it also requires a second factor.
+     * valid Clerk session is required, but this action does not establish an
+     * administrator role or require paid MFA.
      */
-    const bookId = await verifyClerkFactor(clerkToken, req.headers.get('origin'));
+    const bookId = await verifyClerkSession(clerkToken, req.headers.get('origin'));
     const uri = secrets.get('MONGODB_URI');
     const database = secrets.get('MONGODB_DATABASE');
     if (!uri || !database) throw new RequestError('MongoDB connection settings are missing.', 503);
