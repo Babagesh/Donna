@@ -291,7 +291,21 @@ export function checkAnswer(text, candidates) {
 // records question's clothes.
 // ---------------------------------------------------------------------------
 const VERDICT_RE = /\b(healthy|healthier|healthiest|good\s+standing|safe|safely|safer|low[\s-]risk|risky|should\s+(?:i|we)|shall\s+(?:i|we)|worth\s+(?:it|renewing|signing)|safe\s+to\s+(?:renew|sign)|renew\s+it|can\s+(?:i|we)\s+trust|are\s+they\s+(?:reliable|ok(?:ay)?|fine|good|legit|legitimate|trustworthy)|trustworthy|recommend)\b/i;
-const COVERAGE_RE = /\b(coverage|covered|covering|(?:what\s+)?(?:do|did|have)\s+you\s+(?:check|cover|monitor|watch|look)|which\s+sources?|sources?\s+(?:do|did|have)\s+you|did\s+you\s+(?:check|look|monitor|fetch)|(?:was|were|is|are)\s+\w*\s*(?:checked|monitored|fetched|reachable|unreachable)|monitor(?:ing|ed)?\s+(?:them|this|it|the\s+compan|sources?)|how\s+fresh|how\s+often\s+(?:do|did)\s+you|when\s+(?:did|was|were).*(?:checked|fetched|monitored|run))\b/i;
+/*
+ * Coverage detection is deliberately at least as broad as the client-side
+ * classifier in askClassify.js, and broader than the reference regex in two
+ * places, because the two errors are not symmetric. Routing a borderline
+ * question to the deterministic floor costs a terser answer; letting a model
+ * paraphrase coverage misstates our own blind spots, on the one part of the
+ * screen whose whole job is to say what we did NOT look at.
+ *
+ * The two widenings, both of which the reference missed:
+ *   - `\w*` on the verb group, so the past tense lands. "What have you
+ *     CHECKED" is one of the surface's own example questions and routed to the
+ *     model, because the reference only ever matched "check".
+ *   - "what failed", which is a question about collection runs, not records.
+ */
+const COVERAGE_RE = /\b(coverage|covered|covering|(?:what\s+)?(?:do|did|have|has)\s+you\s+(?:check|cover|monitor|watch|look)\w*|which\s+sources?|sources?\s+(?:do|did|have)\s+you|did\s+you\s+(?:check|look|monitor|fetch)\w*|what\s+(?:failed|did\s+not\s+complete)|(?:was|were|is|are)\s+\w*\s*(?:checked|monitored|fetched|reachable|unreachable)|monitor(?:ing|ed)?\s+(?:them|this|it|the\s+compan|sources?)|how\s+fresh|how\s+often\s+(?:do|did)\s+you|when\s+(?:did|was|were).*(?:checked|fetched|monitored|run))\b/i;
 const WATCHED_TERMS_RE = /\b(terms?|watched|breach(?:es|ed|ing)?|violat(?:e|ed|es|ion|ing)|covenant|clause|contractual|notice\s+(?:period|clause|term)|key\s+person|non[\s-]?compete|change.of.control\s+(?:clause|term)|contract\s*(?:break|issue|problem)?)\b/i;
 
 export function classifyIntent(question) {
