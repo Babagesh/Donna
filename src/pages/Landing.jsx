@@ -72,7 +72,14 @@ export default function Landing() {
             <span className="font-serif text-[27px] italic leading-none text-secondary-foreground">d</span>
             <span>donna<span className="text-secondary-foreground">.</span></span>
           </span>
-          <Link to="/login" className="text-link text-[11px]">Sign in <ArrowRight size={13} /></Link>
+          <div className="flex items-center gap-4">
+            {/* The sample book is the only way to evaluate the refusals below
+                without an account -- and this page was otherwise a dead end:
+                it held exactly two links, neither of which went back into the
+                product. Clicking the logo from a demo page landed here. */}
+            <Link to="/demo" className="text-link text-[11px]">See the sample book</Link>
+            <Link to="/login" className="text-link text-[11px]">Sign in <ArrowRight size={13} /></Link>
+          </div>
         </div>
       </header>
 
