@@ -11,6 +11,7 @@ import SignalList from '@/components/donna/SignalList';
 import SourceTable from '@/components/donna/SourceTable';
 import ContractCoverage from '@/components/donna/ContractCoverage';
 import { asTier, coverageOf, coverageSentence, initialsFor, stampLabel } from '@/components/donna/live/liveShapes';
+import LiveAsk from '@/components/donna/live/LiveAsk';
 export default function LiveCompany() {
  const {id}=useParams();
  const query=useInfiniteQuery({queryKey:['donna-live','company',id],queryFn:({pageParam})=>liveRequest({action:'getCompany',company_id:id,...(pageParam?{cursor:pageParam}:{})}),initialPageParam:null,getNextPageParam:page=>page.deals.has_more?page.deals.next_cursor:undefined,retry:false});
@@ -43,6 +44,7 @@ export default function LiveCompany() {
     </div>
    </div>
    <aside><LinkedDeals deals={deals} live/>{query.hasNextPage&&<button disabled={query.isFetchingNextPage} className="button-secondary mt-4" onClick={()=>query.fetchNextPage()}>{query.isFetchingNextPage?'Loading…':'Load more linked agreements'}</button>}<section className="panel p-5 mt-5"><h2 className="section-title">Recorded identity</h2><dl className="metadata-list"><dt>Canonical name</dt><dd>{record.company.canonical_name}</dd><dt>Aliases</dt><dd>{record.company.aliases?.join(', ')||'Not provided'}</dd><dt>Domains</dt><dd>{record.company.domains?.join(', ')||'Not provided'}</dd><dt>Resolution</dt><dd>{record.company.resolution?.reason||'Manually recorded, not independently verified'}</dd><dt>Recorded at</dt><dd>{record.company.created_date}</dd></dl><p className="text-[10px] text-muted-foreground mt-4">Identity is entered by hand and not independently verified. There is no composite score for this counterparty.</p></section></aside></div>
+    <div className="mt-7"><LiveAsk companyId={id}/></div>
   </>}
  </>;
 }
