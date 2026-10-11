@@ -21,6 +21,7 @@ export const ASK_COPY = {
   evidence: 'The stored excerpt is reproduced as it was collected. It is not a newly validated finding.',
   matches: 'Matching stored records, newest first. Nothing here was written for this answer.',
   noExcerpt: 'The matching records store no excerpt text, which is a gap in the record rather than an absence of change.',
+  evidenceFallback: 'No stored record matches those words, so the most recently stored excerpts are shown instead. On the words asked about: not observed in what has been checked — this does not establish absence.',
   noTerms: 'No stored signal records a term it touches for these agreements, so every row below shows what was signed and watched with no matching observation.',
   baseline: count => `${count} stored baseline ${count === 1 ? 'record was' : 'records were'} left out: a baseline is a starting state, not something that happened.`,
   untracked: count => `${count} ${count === 1 ? 'agreement records' : 'agreements record'} no watched term, so nothing could be matched against ${count === 1 ? 'it' : 'them'}.`
