@@ -52,6 +52,13 @@ export const requestSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('getBriefing'), briefing_id: idSchema.optional(), company_id: idSchema.optional() }).strict(),
   z.object({ action: z.literal('listBriefings'), mode: z.enum(['briefing', 'profile']).optional(), cursor: idSchema.optional() }).strict(),
   z.object({ action: z.literal('getEvidence'), id: idSchema }).strict(),
-  z.object({ action: z.literal('listRuns'), company_id: idSchema.optional(), batch_id: idSchema.optional() }).strict()
+  z.object({ action: z.literal('listRuns'), company_id: idSchema.optional(), batch_id: idSchema.optional() }).strict(),
+  /**
+   * The one action that calls a model. `question` is capped at the same 500
+   * characters the Ask input enforces, and `company_id` is the page's scope
+   * when the question was asked from a counterparty page. There is no book_id:
+   * the backend scopes every read to the verified Clerk subject.
+   */
+  z.object({ action: z.literal('askDonna'), question: text(500), company_id: idSchema.optional() }).strict()
 ]).refine(input => input.action !== 'getBriefing' || Boolean(input.briefing_id || input.company_id), { path: ['briefing_id'], message: 'Provide a briefing id or a company id.' });
 export const escapeRegex = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
