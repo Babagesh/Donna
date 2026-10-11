@@ -1,9 +1,28 @@
 import { MongoClient } from 'npm:mongodb@6.12.0';
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.52';
 import { secrets } from 'base44:runtime';
 import { requestSchema } from './donnaValidation.ts';
 import { verifyClerkFactor } from './donnaClerk.ts';
 
+/*
+ * Clerk is the ONLY sign-in for this backend.
+ *
+ * This used to gate on a Base44 session (createClientFromRequest + auth.me())
+ * AND a Clerk session AND a second factor: three steps where one does the job.
+ * The Base44 session did no work Clerk does not already do -- it only supplied
+ * the user id that became `book_id` -- so it is gone, and the Clerk subject is
+ * now the identity and the book scope.
+ *
+ * verifyClerkFactor() in donnaClerk.ts is the whole check. It proves, against
+ * the issuer's live JWKS: a valid unexpired RS256 token with exp/iat/sub/sid;
+ * an active, non-impersonated session (no `sts: 'pending'`, no `act`); the
+ * calling origin (`azp`); and a verified SECOND FACTOR (`fva[1]`). The second
+ * factor is still mandatory for every action -- that requirement did not move.
+ *
+ * Nothing was migrated, and nothing needed to be: `donna_auth_links` was empty,
+ * so no identity had ever been recorded against this database. Records written
+ * under the old Base44 user ids are simply orphaned under a `book_id` nobody
+ * authenticates as any more.
+ */
 export class RequestError extends Error {
   constructor(message, status = 400) { super(message); this.status = status; }
 }
@@ -11,10 +30,6 @@ export async function withDonnaDatabase(req, run) {
   let client;
   try {
     if (req.method !== 'POST') throw new RequestError('Use POST.', 405);
-    const base44 = createClientFromRequest(req);
-    let user;
-    try { user = await base44.auth.me(); } catch { throw new RequestError('Sign in to access your live agreements.', 401); }
-    if (!user?.id) throw new RequestError('Sign in to access your live agreements.', 401);
     const text = await req.text();
     if (text.length > 400000) throw new RequestError('Request is too large.', 413);
     let body;
