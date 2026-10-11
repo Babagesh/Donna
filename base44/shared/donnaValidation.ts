@@ -15,11 +15,30 @@ export const dealSchema = z.object({
 }).refine(d => d.end_date >= d.start_date, { path: ['end_date'], message: 'End date cannot be before start date.' });
 export const companySchema = z.object({ canonical_name: text(300), registry_id: text(100), domain: z.union([z.literal(''), z.string().trim().max(253).regex(/^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/)]).optional() });
 export const standaloneCompanySchema = companySchema.extend({ registry_id: z.string().trim().max(100).optional(), country: z.string().trim().toUpperCase().regex(/^[A-Z]{2}$/) });
+/**
+ * A pre-deal lookup. Name and country are all that is required, because the
+ * point is to ask about a counterparty you have NOT signed and therefore have
+ * no agreement fields for.
+ *
+ * `watch_until` is the optional negotiation window. Blank means the one-shot
+ * default: a single onboarding pass and no schedules, so a company glanced at
+ * once cannot cost Bright Data credits every day forever. A date in the past is
+ * rejected rather than silently ignored -- it would create a watch that expires
+ * before its first tick, which reads as "watching" on screen while nothing is
+ * ever fetched.
+ */
+export const lookupRequestSchema = standaloneCompanySchema.extend({
+  watch_until: z.union([z.literal(''), date]).optional()
+}).refine(l => !l.watch_until || l.watch_until >= new Date().toISOString().slice(0, 10), { path: ['watch_until'], message: 'Choose today or a later date, or leave it blank for a one-off lookup.' });
+
 export const idSchema = text(100);
 export const reasonSchema = z.string().trim().min(10, 'Explain your manual decision in at least 10 characters.').max(1000);
 export const requestSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('testConnection') }).strict(),
   z.object({ action: z.literal('getBook'), search: z.string().trim().max(200).optional(), sort: z.enum(['name', 'value', 'agreements']).optional(), cursor: z.string().regex(/^\d{1,7}$/).optional() }).strict(),
+  z.object({ action: z.literal('getBookExposure') }).strict(),
+  z.object({ action: z.literal('requestLookup'), lookup: lookupRequestSchema, request_id: z.string().uuid() }).strict(),
+  z.object({ action: z.literal('getLookup'), company_id: idSchema }).strict(),
   z.object({ action: z.literal('listDeals'), status: z.enum(['all', 'unresolved', 'needs_review', 'resolved']).optional(), search: z.string().trim().max(200).optional(), cursor: idSchema.optional() }).strict(),
   z.object({ action: z.literal('getDeal'), deal_id: idSchema }).strict(),
   z.object({ action: z.literal('createCompany'), company: standaloneCompanySchema, request_id: z.string().uuid() }).strict(),
