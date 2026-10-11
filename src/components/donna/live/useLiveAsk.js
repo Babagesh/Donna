@@ -61,6 +61,24 @@ export function useAskRuns(companyId, enabled) {
   });
 }
 
+/**
+ * The one model-backed read. Retrieval still happens server-side and stays
+ * scoped to the signed-in account, so nothing here passes a book_id either.
+ *
+ * `answer_status: 'fallback'` is NOT an error: it means no usable model answer
+ * exists for this question -- no key configured, nothing citable retrieved, or
+ * the draft failed the backend gate -- and the caller renders the deterministic
+ * answer instead. A rejected request is the only thing that surfaces as an
+ * error, and that path falls back too.
+ */
+export function useAskDonna(question, companyId, enabled) {
+  return useQuery({
+    queryKey: ['donna-live', 'ask-donna', companyId || 'book', question],
+    queryFn: () => liveRequest({ action: 'askDonna', question, ...(companyId ? { company_id: companyId } : {}) }),
+    staleTime: 60000, retry: false, enabled: Boolean(enabled && question)
+  });
+}
+
 /** One stored snapshot, for the fetch time and the run behind a cited excerpt. */
 export function askEvidenceQuery(id) {
   return {
