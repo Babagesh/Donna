@@ -30,6 +30,7 @@ import LiveBriefings from '@/pages/LiveBriefings';
 import LiveBriefing from '@/pages/LiveBriefing';
 import LiveEvidence from '@/pages/LiveEvidence';
 import LiveCoverage from '@/pages/LiveCoverage';
+import LiveLookup from '@/pages/LiveLookup';
 import ClerkGate from '@/components/donna/live/ClerkGate';
 import ClerkRoot from '@/components/donna/live/ClerkRoot';
 import ClerkAccess from '@/components/donna/live/ClerkAccess';
@@ -108,6 +109,7 @@ const AuthenticatedApp = () => {
           <Route path="/live-briefing/:id" element={<LiveBriefing />} />
           <Route path="/live-evidence/:id" element={<LiveEvidence />} />
           <Route path="/live-coverage" element={<LiveCoverage />} />
+          <Route path="/live-lookup" element={<LiveLookup />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
