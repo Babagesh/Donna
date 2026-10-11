@@ -36,19 +36,56 @@ export async function withDonnaDatabase(req, run) {
     try { body = JSON.parse(text); } catch { throw new RequestError('Send a valid JSON request.'); }
     const { clerk_token: clerkToken, ...operation } = body;
     body = requestSchema.parse(operation);
-    if (body.action === 'testConnection' && user.role !== 'admin') throw new RequestError('Administrator access required.', 403);
-    const clerkId = body.action === 'testConnection' ? null : await verifyClerkFactor(clerkToken, req.headers.get('origin'));
+    /*
+     * Every action, with no exception, goes through the one check.
+     *
+     * `testConnection` used to be the exception twice over: it skipped Clerk
+     * entirely and instead required `user.role === 'admin'`, a Base44 role that
+     * no longer exists. CHOICE: keep the action and hold it to exactly the same
+     * verified-Clerk-session bar as every other action, rather than dropping
+     * it. Reasons: (a) it is the only way to tell "MongoDB is unreachable or
+     * misconfigured" apart from "this book is simply empty", which is worth
+     * keeping now that a book starts empty by definition; (b) there is no role
+     * left to gate it with, and leaving it reachable with NO check would make
+     * an unauthenticated caller able to probe the database connection. A
+     * verified Clerk session is a strictly higher bar than the old admin role
+     * was, because it also requires a second factor.
+     */
+    const bookId = await verifyClerkFactor(clerkToken, req.headers.get('origin'));
     const uri = secrets.get('MONGODB_URI');
     const database = secrets.get('MONGODB_DATABASE');
     if (!uri || !database) throw new RequestError('MongoDB connection settings are missing.', 503);
     client = new MongoClient(uri, { serverSelectionTimeoutMS: 10000, connectTimeoutMS: 10000, socketTimeoutMS: 15000, maxPoolSize: 2 });
     await client.connect();
     const db = client.db(database);
-    if (clerkId) {
-      const link = await db.collection('donna_auth_links').findOneAndUpdate({ _id: user.id }, { $setOnInsert: { clerk_user_id: clerkId, linked_at: new Date().toISOString() } }, { upsert: true, returnDocument: 'after' });
-      if (link.clerk_user_id !== clerkId) throw new RequestError('Sign in with the Clerk account linked to this agreement book.', 403);
-    }
-    const result = await run(db, user, body);
+    /*
+     * `donna_books` is the book registry, and it is load-bearing, not
+     * bookkeeping. A headless orchestrator writes monitoring data (snapshots,
+     * changes, signals, clusters, briefings, collector_runs) for a book, and
+     * with no Base44 user list left to read, this collection is the ONLY way
+     * for it to discover which books exist. Deliberately the book id and two
+     * timestamps and nothing else: no email, no name, no token, no PII.
+     *
+     * `donna_auth_links` is obsolete and no longer read or written. The
+     * collection itself is left in place, empty, rather than dropped.
+     */
+    const seenAt = new Date().toISOString();
+    await db.collection('donna_books').updateOne(
+      { _id: bookId },
+      { $setOnInsert: { book_id: bookId, first_seen_at: seenAt }, $set: { last_seen_at: seenAt } },
+      { upsert: true }
+    );
+    /*
+     * `.id` here is a CLERK SUBJECT (the token's `sub`), NOT a Base44 user id.
+     *
+     * Downstream handlers all take `(db, user, body)` and scope every query by
+     * `user.id` as `book_id`. Putting the Clerk sub on `.id` is what makes the
+     * Clerk identity the book scope, without touching a single handler. This
+     * object carries nothing else -- there is no email, no full_name and, in
+     * particular, no `role`, so do not reach for one.
+     */
+    const identity = { id: bookId };
+    const result = await run(db, identity, body);
     return Response.json(result, { headers: { 'Cache-Control': 'no-store' } });
   } catch (error) {
     if (error instanceof RequestError) return Response.json({ error: error.message }, { status: error.status });
