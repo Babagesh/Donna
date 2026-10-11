@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { SignIn, SignUp, useSession } from '@clerk/clerk-react';
+import { SignIn, SignUp, TaskChooseOrganization, TaskResetPassword, TaskSetupMFA, useSession } from '@clerk/clerk-react';
+import { useAuth } from '@/lib/AuthContext';
 import { useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { setLiveTokenProvider } from '@/components/donna/live/liveApi';
@@ -24,15 +25,17 @@ import ClerkSecondFactor from '@/components/donna/live/ClerkSecondFactor';
  */
 export default function ClerkSession({ children, unauthenticatedElement }) {
   const { session, isLoaded, isSignedIn } = useSession();
-  const { pathname } = useLocation();
+  const { user } = useAuth();
+  const accountSession = session ? `${user?.id}:${session.id}` : null;
+  const { pathname, search } = useLocation();
   const cache = useQueryClient();
   const [ready, setReady] = useState(null);
   const [verifiedSession, setVerifiedSession] = useState(null);
   useEffect(() => {
-    setLiveTokenProvider(session ? () => session.getToken() : null);
-    setReady(session?.id || null);
+    setLiveTokenProvider(session?.status === 'active' ? () => session.getToken({ skipCache: true }) : null);
+    setReady(accountSession);
     return () => { setLiveTokenProvider(null); cache.removeQueries({ queryKey: ['donna-live'] }); };
-  }, [session?.id, cache]);
+  }, [accountSession, session?.status, cache]);
   if (!isLoaded) return <div className="page-container" role="status">Loading sign-in…</div>;
   if (!isSignedIn && pathname === '/sign-up') return <div className="page-container"><div className="page-heading"><div><div className="page-kicker">STEP 1 OF 2 · CREATE ACCOUNT</div><h1>Create your live book account</h1><p>Sign up here, then verify a second factor. Those two steps are the whole sign-in — there is no separate account to create.</p></div></div><SignUp routing="hash" signInUrl="/" forceRedirectUrl="/" /></div>;
   // An unauthenticated visitor on a route that has public content (`/`) gets

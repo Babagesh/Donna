@@ -14,7 +14,10 @@ export default function ClerkSecondFactor({ onVerified }) {
   });
   async function submit() {
     setBusy(true); setError('');
-    try { if (await verify()) onVerified(); }
+    try {
+      if (await verify() === true) onVerified();
+      else setError('Two-factor verification is not complete. Please try again.');
+    }
     catch (err) { setError(err.errors?.[0]?.longMessage || err.message || 'Verification was cancelled. Please try again.'); }
     finally { setBusy(false); }
   }

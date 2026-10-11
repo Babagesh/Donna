@@ -3,8 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
-import { AuthProvider, useAuth } from '@/lib/AuthContext';
-import UserNotRegisteredError from '@/components/UserNotRegisteredError';
+import { AuthProvider } from '@/lib/AuthContext';
 import ScrollToTop from './components/ScrollToTop';
 import WorkspaceLayout from '@/components/donna/WorkspaceLayout';
 import Book from '@/pages/Book';
@@ -20,8 +19,6 @@ import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import LoginRedirect from '@/components/donna/live/LoginRedirect';
 import DealDashboard from '@/pages/DealDashboard';
 import DealDetail from '@/pages/DealDetail';
 import LiveIntake from '@/pages/LiveIntake';
@@ -35,28 +32,24 @@ import LiveCoverage from '@/pages/LiveCoverage';
 import ClerkGate from '@/components/donna/live/ClerkGate';
 import Landing from '@/pages/Landing';
 
+/*
+ * Clerk is the ONLY sign-in.
+ *
+ * There used to be a Base44 gate in front of the Clerk gate: ProtectedRoute
+ * (Base44 auth) wrapped the live routes, so a user signed in twice and then
+ * verified a second factor -- three steps where one does the job, and the
+ * extra one read like a loop. This component also blocked the whole app,
+ * public pages included, on a Base44 `auth.me()` round trip, and could replace
+ * it outright with UserNotRegisteredError. Base44's auth did no work Clerk
+ * does not already do: it only supplied the user id that became `book_id`, and
+ * the Clerk subject is that id now. So the gate, the blocking wait and the
+ * not-registered screen are all gone, and the routes below render immediately.
+ *
+ * Base44's own auth pages (`/login`, `/register`, `/forgot-password`,
+ * `/reset-password`) are left mounted and reachable, but nothing in the app
+ * sends anyone to them any more and no route depends on them.
+ */
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
-
-  // Show loading spinner while checking app public settings or auth
-  if (isLoadingPublicSettings || isLoadingAuth) {
-    return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  // Handle authentication errors
-  if (authError) {
-    if (authError.type === 'user_not_registered') {
-      return <UserNotRegisteredError />;
-    }
-    // Keep public auth pages reachable when a session is absent or expired.
-    // ProtectedRoute handles access to private pages without redirecting login to itself.
-  }
-
-  // Render the main app
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
@@ -77,39 +70,45 @@ const AuthenticatedApp = () => {
       {/* `/` serves the landing page to a visitor and the monitoring book once
           they are signed in AND past the second factor. One URL, correct content
           for each state: the book never loads before MFA, and the landing is
-          reachable without an account. */}
+          reachable without an account.
+
+          `unauthenticatedElement={<Landing />}` is what keeps the first half of
+          that true. It used to be a ProtectedRoute prop; now ClerkGate passes it
+          to ClerkSession, which returns it instead of the Clerk sign-in form when
+          no one is signed in. Without it, a visitor to `/` lands on a sign-in
+          form and the public landing page becomes unreachable. */}
       {/* WorkspaceLayout sits OUTSIDE ClerkGate on purpose.
 
           The gate has three waiting states -- loading, Clerk sign-in, and the
-          second factor -- and Clerk sign-in is separate from Base44 sign-in, so
-          a user can legitimately sit in one of them for a while. With the layout
-          inside the gate, every one of those states rendered with no sidebar, so
-          the first page you land on offered no way to go anywhere at all.
-          Keeping the layout outside means navigation always works, including
-          back out to the unauthenticated sample pages, while the main area shows
-          whatever the gate needs. */}
-      <Route element={<ProtectedRoute unauthenticatedElement={<Landing />} />}>
-        <Route element={<WorkspaceLayout />}>
-          <Route element={<ClerkGate />}>
-            <Route path="/" element={<LiveBook />} />
-          </Route>
+          second factor -- and a user can legitimately sit in one of them for a
+          while, in particular on the second factor with nothing enrolled yet.
+          With the layout inside the gate, every one of those states rendered
+          with no sidebar, so the first page you land on offered no way to go
+          anywhere at all. Keeping the layout outside means navigation always
+          works, including back out to the unauthenticated sample pages, while
+          the main area shows whatever the gate needs. */}
+      <Route element={<WorkspaceLayout />}>
+        <Route element={<ClerkGate unauthenticatedElement={<Landing />} />}>
+          <Route path="/" element={<LiveBook />} />
         </Route>
       </Route>
-      <Route element={<ProtectedRoute unauthenticatedElement={<LoginRedirect />} />}>
-        <Route element={<WorkspaceLayout />}>
-          <Route element={<ClerkGate />}>
-            <Route path="/sign-up" element={<Navigate to="/" replace />} />
-            <Route path="/deals" element={<DealDashboard />} />
-            <Route path="/deals/:id" element={<DealDetail />} />
-            <Route path="/live-book" element={<LiveBook />} />
-            <Route path="/live-intake" element={<LiveIntake />} />
-            <Route path="/live-review" element={<LiveReview />} />
-            <Route path="/live-company/:id" element={<LiveCompany />} />
-            <Route path="/live-briefings" element={<LiveBriefings />} />
-            <Route path="/live-briefing/:id" element={<LiveBriefing />} />
-            <Route path="/live-evidence/:id" element={<LiveEvidence />} />
-            <Route path="/live-coverage" element={<LiveCoverage />} />
-          </Route>
+      {/* No `unauthenticatedElement` here: these are deep links into live data,
+          so a visitor should land on step 1 of the Clerk sign-in, which is what
+          ClerkSession renders by default. This block used to redirect to
+          Base44's `/login`, which is no longer a sign-in this app uses. */}
+      <Route element={<WorkspaceLayout />}>
+        <Route element={<ClerkGate />}>
+          <Route path="/sign-up" element={<Navigate to="/" replace />} />
+          <Route path="/deals" element={<DealDashboard />} />
+          <Route path="/deals/:id" element={<DealDetail />} />
+          <Route path="/live-book" element={<LiveBook />} />
+          <Route path="/live-intake" element={<LiveIntake />} />
+          <Route path="/live-review" element={<LiveReview />} />
+          <Route path="/live-company/:id" element={<LiveCompany />} />
+          <Route path="/live-briefings" element={<LiveBriefings />} />
+          <Route path="/live-briefing/:id" element={<LiveBriefing />} />
+          <Route path="/live-evidence/:id" element={<LiveEvidence />} />
+          <Route path="/live-coverage" element={<LiveCoverage />} />
         </Route>
       </Route>
       <Route path="*" element={<PageNotFound />} />
