@@ -91,7 +91,7 @@ function scopeSentence(names, total, asOf, searched, storedTotal) {
 
 /**
  * Turn a classified question plus the stored records into a renderable answer.
- * @param {{plan:any,companyId?:any,companies?:any[],signals?:any[],deals?:any[],runs?:any[],signalsTotal?:number,dealsTotal?:number}} input
+ * @param {{plan:any,companyId?:any,companies?:any[],signals?:any[],deals?:any[],runs?:any[],signalsTotal?:number}} input
  */
 export function assembleAsk(input) {
   const plan = input.plan;
@@ -132,7 +132,9 @@ export function assembleAsk(input) {
     }
     rows.push(...unmatched.slice(0, Math.max(0, MAX_ROWS - rows.length)));
   }
-  const rowsHidden = Math.max(0, scopedDeals.reduce((total, deal) => total + watchTermsOf(deal).length, 0) - rows.length - untracked);
+  const rowsHidden = plan.kind === 'terms' || plan.termsQuestion
+    ? Math.max(0, scopedDeals.reduce((total, deal) => total + watchTermsOf(deal).length, 0) - rows.length)
+    : 0;
 
   // Evidence: the stored excerpt, with the snapshot it came from. A quoted phrase is
   // searched against stored excerpts exactly, whatever else the question asked for.
@@ -204,6 +206,6 @@ export function assembleAsk(input) {
     showRuns: plan.kind === 'coverage' || plan.verdict,
     scoped: Boolean(input.companyId) || named.length === 1,
     openCoverage: plan.kind === 'coverage' || plan.verdict || !hasResult,
-    scopeLine: scopeSentence(coverage.map(row => row.name), coverage.length, asOf, observed.length, input.signalsTotal ?? observed.length)
+    scopeLine: scopeSentence(coverage.map(row => row.name), coverage.length, asOf, scopedSignals.length, input.signalsTotal ?? scopedSignals.length)
   };
 }
