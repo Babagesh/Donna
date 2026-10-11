@@ -302,8 +302,8 @@ h1 { color:hsl(var(--foreground)); }
 .sidebar .brand-mark,.sidebar .brand-period { color:hsl(var(--sidebar-primary)); }
 .button-primary { background:hsl(var(--primary)); border-color:hsl(var(--primary)); color:hsl(var(--primary-foreground)); }
 .button-primary:hover { background:hsl(var(--primary) / .92); }
-.button-secondary { background:hsl(var(--secondary)); border-color:hsl(var(--border)); color:hsl(var(--secondary-foreground)); }
-.button-secondary:hover { background:hsl(var(--secondary) / .7); }
+.button-secondary { background:hsl(var(--accent)); border-color:hsl(var(--border)); color:hsl(var(--accent-foreground)); }
+.button-secondary:hover { background:hsl(var(--primary) / .12); }
 .reading-note,.coverage-note,.count-chip,.company-monogram { background:hsl(var(--accent)); border-color:hsl(var(--border)); color:hsl(var(--accent-foreground)); }
 .form-field input,.form-field select,.form-field textarea,.search-input { background:hsl(var(--card)); border-color:hsl(var(--input)); color:hsl(var(--foreground)); }
 .search-input input { color:hsl(var(--foreground)); width:190px; }
@@ -312,9 +312,10 @@ button:focus-visible,a:focus-visible { outline-color:hsl(var(--ring)); }
 .stat-cell:nth-child(2) { background:hsl(var(--secondary) / .7); }
 .page-kicker { color:hsl(var(--secondary-foreground) / .85); }
 .count-chip { background:hsl(var(--secondary)); color:hsl(var(--secondary-foreground)); }
-.nav-active { box-shadow:inset 3px 0 0 hsl(var(--sidebar-primary) / .75); }
+.nav-active { background:hsl(var(--sidebar-primary) / .14); color:hsl(var(--sidebar-primary)); box-shadow:inset 3px 0 0 hsl(var(--sidebar-primary) / .75); }
+.nav-active:hover { background:hsl(var(--sidebar-primary) / .19); color:hsl(var(--sidebar-primary)); }
 .nav-active svg { color:hsl(var(--sidebar-primary)); }
-.table-tabs button.selected,.record-tabs button.selected { border-bottom-color:hsl(var(--secondary-foreground) / .65); }
+.table-tabs button.selected,.record-tabs button.selected { border-bottom-color:hsl(var(--primary)); }
 .deal-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
 .deal-card { min-height:250px; border-top:3px solid hsl(var(--secondary-foreground) / .4); }
 .deal-card:hover { background:hsl(var(--accent) / .28); }
