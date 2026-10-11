@@ -39,8 +39,8 @@ const VERDICT = [
 const COVERAGE = [
   /\b(coverage|covered|cover|covers|checked|check|checks|checking|rechecked|unchecked|recheck)\b/,
   /\b(gap|gaps|blind|blindspot|failed|failing|failure|failures|errored|stale|missing|omitted)\b/,
-  /\b(monitor|monitored|monitoring|run|runs|batch|collection|sources|source|scope|often|frequency|freshness)\b/,
-  /\b(not covered|don't cover|do not cover|never cover|cannot see|can't see|out of scope)\b/
+  /\b(monitor|monitored|monitoring|runs|batch|collection|scope|often|frequency|freshness)\b/,
+  /\b(what sources|which sources|how many sources|source coverage|sources failed|last run|collection run|not covered|don't cover|do not cover|never cover|cannot see|can't see|out of scope)\b/
 ];
 
 /** Watched terms: the join between what a deal signed and what a signal touches. */
