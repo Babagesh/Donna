@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { SignIn, SignUp, TaskChooseOrganization, TaskResetPassword, TaskSetupMFA, useSession } from '@clerk/clerk-react';
-import { useAuth } from '@/lib/AuthContext';
 import { useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { setLiveTokenProvider } from '@/components/donna/live/liveApi';
@@ -25,8 +24,7 @@ import ClerkSecondFactor from '@/components/donna/live/ClerkSecondFactor';
  */
 export default function ClerkSession({ children, unauthenticatedElement }) {
   const { session, isLoaded, isSignedIn } = useSession();
-  const { user } = useAuth();
-  const accountSession = session ? `${user?.id}:${session.id}` : null;
+  const accountSession = session ? `${session.user.id}:${session.id}` : null;
   const { pathname, search } = useLocation();
   const cache = useQueryClient();
   const [ready, setReady] = useState(null);
@@ -37,13 +35,17 @@ export default function ClerkSession({ children, unauthenticatedElement }) {
     return () => { setLiveTokenProvider(null); cache.removeQueries({ queryKey: ['donna-live'] }); };
   }, [accountSession, session?.status, cache]);
   if (!isLoaded) return <div className="page-container" role="status">Loading sign-in…</div>;
-  if (!isSignedIn && pathname === '/sign-up') return <div className="page-container"><div className="page-heading"><div><div className="page-kicker">STEP 1 OF 2 · CREATE ACCOUNT</div><h1>Create your live book account</h1><p>Sign up here, then verify a second factor. Those two steps are the whole sign-in — there is no separate account to create.</p></div></div><SignUp routing="hash" signInUrl="/" forceRedirectUrl="/" /></div>;
+  const task = session?.currentTask?.key;
+  if (task === 'choose-organization') return <TaskChooseOrganization redirectUrlComplete="/" />;
+  if (task === 'reset-password') return <TaskResetPassword redirectUrlComplete="/" />;
+  if (task === 'setup-mfa') return <TaskSetupMFA redirectUrlComplete="/" />;
+  if (!isSignedIn && pathname === '/sign-up') return <div className="page-container"><div className="page-heading"><div><div className="page-kicker">STEP 1 OF 2 · CREATE ACCOUNT</div><h1>Create your live book account</h1><p>Sign up here, then verify a second factor. Those two steps are the whole sign-in — there is no separate account to create.</p></div></div><SignUp routing="hash" signInUrl="/sign-in" forceRedirectUrl="/" oauthFlow="popup" /></div>;
   // An unauthenticated visitor on a route that has public content (`/`) gets
   // that content, not a sign-in form. This is what Base44's removed
   // ProtectedRoute `unauthenticatedElement` used to do.
   if (!isSignedIn && unauthenticatedElement) return unauthenticatedElement;
-  if (!isSignedIn) return <div className="page-container"><div className="page-heading"><div><div className="page-kicker">STEP 1 OF 2 · SIGN IN</div><h1>Sign in to your live book</h1><p>This is the only sign-in. Step 2 verifies a second factor, which live agreement data always requires.</p></div></div><SignIn routing="hash" signUpUrl="/sign-up" forceRedirectUrl={window.location.href.split('#')[0]}/></div>;
-  if (ready !== session.id) return <div className="page-container" role="status">Preparing secure access…</div>;
+  if (!isSignedIn) return <div className="page-container"><div className="page-heading"><div><div className="page-kicker">STEP 1 OF 2 · SIGN IN</div><h1>Sign in to your live book</h1><p>This is the only sign-in. Step 2 verifies a second factor, which live agreement data always requires.</p></div></div><SignIn routing="hash" signUpUrl="/sign-up" forceRedirectUrl={pathname === '/sign-in' ? '/' : pathname + search} oauthFlow="popup"/></div>;
+  if (ready !== accountSession) return <div className="page-container" role="status">Preparing secure access…</div>;
   const secondFactorAge = session.factorVerificationAge?.[1];
   const verified = Number.isInteger(secondFactorAge) && secondFactorAge >= 0;
   if (!verified && verifiedSession !== session.id) return <div className="page-container"><ClerkSecondFactor onVerified={() => setVerifiedSession(session.id)}/></div>;

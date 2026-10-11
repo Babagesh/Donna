@@ -17,7 +17,7 @@ export default function ClerkRoot({ children }) {
   return <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}
     routerPush={(to, metadata) => route(to, metadata)}
     routerReplace={(to, metadata) => route(to, metadata, true)}
-    signInUrl="/" signUpUrl="/sign-up"
+    signInUrl="/sign-in" signUpUrl="/sign-up"
     signInFallbackRedirectUrl="/" signUpFallbackRedirectUrl="/"
     taskUrls={{ 'choose-organization': '/', 'reset-password': '/', 'setup-mfa': '/' }}
     afterSignOutUrl="/">

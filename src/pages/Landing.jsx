@@ -78,7 +78,7 @@ export default function Landing() {
                 it held exactly two links, neither of which went back into the
                 product. Clicking the logo from a demo page landed here. */}
             <Link to="/demo" className="text-link text-[11px]">See the sample book</Link>
-            <Link to="/login" className="text-link text-[11px]">Sign in <ArrowRight size={13} /></Link>
+            <Link to="/sign-in" className="text-link text-[11px]">Sign in <ArrowRight size={13} /></Link>
           </div>
         </div>
       </header>
@@ -97,7 +97,7 @@ export default function Landing() {
             record it came from and the date it was read.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link to="/login" className="button-primary">Sign in <ArrowRight size={14} /></Link>
+            <Link to="/sign-in" className="button-primary">Sign in <ArrowRight size={14} /></Link>
             <a href="#refuses" className="button-secondary">What it refuses to do</a>
           </div>
         </section>
@@ -269,7 +269,7 @@ export default function Landing() {
             The sample book above is fictional and shared with everyone.
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-3">
-            <Link to="/login" className="button-primary">Sign in <ArrowRight size={14} /></Link>
+            <Link to="/sign-in" className="button-primary">Sign in <ArrowRight size={14} /></Link>
           </div>
         </section>
       </main>

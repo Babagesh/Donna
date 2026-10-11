@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 import { CLERK_PUBLISHABLE_KEY } from '@/lib/clerkConfig';
 import ClerkSession from '@/components/donna/live/ClerkSession';
 
-export default function ClerkGate() {
+export default function ClerkGate({ unauthenticatedElement }) {
   if (!CLERK_PUBLISHABLE_KEY) {
     return (
       <div className="page-container">
@@ -19,5 +19,5 @@ export default function ClerkGate() {
     );
   }
 
-  return <ClerkSession><Outlet /></ClerkSession>;
+  return <ClerkSession unauthenticatedElement={unauthenticatedElement}><Outlet /></ClerkSession>;
 }
