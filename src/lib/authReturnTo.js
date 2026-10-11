@@ -21,6 +21,7 @@ export function safeReturnTo() {
       url.searchParams.delete(p);
     }
     const path = url.pathname + url.search;
+    if (["/login", "/register", "/forgot-password", "/reset-password"].includes(url.pathname.replace(/\/$/, "").toLowerCase())) return "/";
     if (!path.startsWith("/") || path.startsWith("//") || path.includes("\\")) return "/";
     return path;
   } catch {

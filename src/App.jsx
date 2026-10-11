@@ -36,7 +36,7 @@ import ClerkGate from '@/components/donna/live/ClerkGate';
 import Landing from '@/pages/Landing';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const { isLoadingAuth, isLoadingPublicSettings, authError } = useAuth();
 
   // Show loading spinner while checking app public settings or auth
   if (isLoadingPublicSettings || isLoadingAuth) {
@@ -51,11 +51,9 @@ const AuthenticatedApp = () => {
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
-      navigateToLogin();
-      return null;
     }
+    // Keep public auth pages reachable when a session is absent or expired.
+    // ProtectedRoute handles access to private pages without redirecting login to itself.
   }
 
   // Render the main app
